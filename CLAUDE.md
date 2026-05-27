@@ -7,6 +7,7 @@
 - `docs/mc-seed-platform-plan.md` — 项目规划（技术机制、字段设计、架构、功能、Microsoft OAuth + Minecraft 验证）
 - `docs/interaction-design.md` — 交互设计（信息架构、浏览模型、详情页、认证墙、移动端、品牌、皮肤头像）
 - `docs/visual-style-guide.md` — 视觉风格指南（颜色系统、字体层级、组件标记、Microsoft 登录按钮、皮肤头像、禁止清单）
+- `docs/api-and-backend-design.md` — API 与后端设计（全部端点、请求/响应 Schema、数据库 DDL、存储层、Auth 中间件、服务层边界）
 
 ## Agent Skills（来自 taste-skill）
 
