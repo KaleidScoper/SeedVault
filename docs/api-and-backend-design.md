@@ -155,7 +155,7 @@ Set-Cookie: seedvault_token=<JWT>; HttpOnly; Secure; SameSite=Lax; Path=/; Max-A
 | `version` | `string` | 精确版本号，如 `1.21.4` |
 | `tags` | `string` | 逗号分隔的 tag key，如 `survival,village`（AND 逻辑） |
 | `mod_env` | `string` | `vanilla` \| `modpack` |
-| `sort` | `string` | `popular`（默认）\| `newest` \| `most_liked` |
+| `sort` | `string` | `popular`（默认）\| `newest` \| `most_liked` \| `most_collected` |
 | `q` | `string` | 关键词，匹配 title + description（ILIKE） |
 | `page` | `int` | 页码，默认 1 |
 | `page_size` | `int` | 每页条数，默认 24 |
@@ -262,6 +262,7 @@ Response 200:
         { "key": "ancient_city", "label": "古代城市", "icon": "🏛️" }
       ],
       "like_count": 42,
+      "collection_count": 15,
       "view_count": 1234,
       "uploader": {
         "id": 1,
@@ -281,6 +282,7 @@ Response 200:
 - `popular`（默认）：热度分 = `(like_count × 0.7 + view_count × 0.3) / (hours_since_created + 4) ^ 1.2`。新种子有冷启动保护（分母 +4），旧种子自然降权。超过 2 个大版本的种子额外降权 ×0.3。
 - `newest`：纯按 `created_at DESC`。
 - `most_liked`：纯按 `like_count DESC`。
+- `most_collected`：纯按 `collection_count DESC`。
 
 ### 4.2 `GET /seeds/{id}`
 
@@ -315,6 +317,7 @@ Response 200:
       { "key": "ancient_city", "label": "古代城市", "icon": "🏛️" }
     ],
     "like_count": 42,
+    "collection_count": 15,
     "view_count": 1235,
     "is_liked": false,
     "uploader": {
@@ -795,6 +798,8 @@ Response 409 (已在收藏夹中):
 
 注意：此操作与 `POST /seeds/{id}/like` 正交。用户可以点赞而不归档，也可以归档而不点赞。
 
+服务端在插入 `collection_seeds` 记录后同步执行 `UPDATE seeds SET collection_count = collection_count + 1 WHERE id = ?`。
+
 ### 10.7 `DELETE /collections/{id}/seeds/{seed_id}`
 
 ```
@@ -807,6 +812,8 @@ Response 200:
 ```
 
 移除后若 `cover_strategy = 'manual'` 且 `cover_seed_id = seed_id`，自动将 `cover_strategy` 回退为 `'last'`（`cover_seed_id` 设为 NULL），避免悬空引用。
+
+服务端在删除 `collection_seeds` 记录后同步执行 `UPDATE seeds SET collection_count = MAX(collection_count - 1, 0) WHERE id = ?`。
 
 ---
 
@@ -975,6 +982,7 @@ Response 200:
   tested_version: str,
   tags: list[TagBrief],
   like_count: int,
+  collection_count: int,
   view_count: int,
   uploader: UserBrief,
   created_at: datetime
@@ -1003,6 +1011,7 @@ Response 200:
   key_coords: list[KeyCoord],
   tags: list[TagBrief],
   like_count: int,
+  collection_count: int,
   view_count: int,
   is_liked: bool,
   uploader: UserBrief,
@@ -1195,6 +1204,7 @@ CREATE TABLE seeds (
   uploader_id        INTEGER NOT NULL REFERENCES users(id),
   view_count         INTEGER NOT NULL DEFAULT 0,
   like_count         INTEGER NOT NULL DEFAULT 0,
+  collection_count   INTEGER NOT NULL DEFAULT 0,
   created_at         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at         DATETIME,
   approved_at        DATETIME,
@@ -1209,6 +1219,7 @@ CREATE INDEX idx_seeds_edition_version ON seeds(edition, tested_version);
 CREATE INDEX idx_seeds_uploader ON seeds(uploader_id);
 CREATE INDEX idx_seeds_created ON seeds(created_at DESC);
 CREATE INDEX idx_seeds_likes ON seeds(like_count DESC);
+CREATE INDEX idx_seeds_collections ON seeds(collection_count DESC);
 ```
 
 ### 13.3 screenshots

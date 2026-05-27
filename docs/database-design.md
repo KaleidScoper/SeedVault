@@ -28,7 +28,7 @@
 
 | 场景 | 降范手段 | 理由 |
 |------|---------|------|
-| 种子热度排序 | `like_count`、`view_count` 冗余存储在 `seeds` 表 | COUNT 查询在大表上不可接受；写入时更新计数器，读取时零 JOIN |
+| 种子热度排序 | `like_count`、`collection_count`、`view_count` 冗余存储在 `seeds` 表 | COUNT 查询在大表上不可接受；写入时更新计数器，读取时零 JOIN |
 | 种子封面图 | `screenshots.is_cover` 布尔标记 | 避免额外 `seed_cover` 表或 `seeds.cover_id` 自引用 |
 | 投稿者摘要 | `uploader_id` 仅存外键，用户名/头像通过 JOIN 查询 | 不降范——用户名可能变更，JOIN 成本可接受 |
 
@@ -236,6 +236,7 @@ idx_comments_seed
 │ uploader_id          │ INTEGER      │ NOT NULL REFERENCES users(id)  │
 │ view_count           │ INTEGER      │ NOT NULL DEFAULT 0             │
 │ like_count           │ INTEGER      │ NOT NULL DEFAULT 0             │
+│ collection_count     │ INTEGER      │ NOT NULL DEFAULT 0             │
 │ created_at           │ DATETIME     │ NOT NULL DEFAULT               │
 │                      │              │   CURRENT_TIMESTAMP            │
 │ updated_at           │ DATETIME     │                                │
@@ -247,7 +248,8 @@ idx_comments_seed
 **设计要点**：
 
 - `seed_value` 使用 VARCHAR(64)，不设种子空间上限（文本种子可超过 64 字符，但 64 字符已覆盖所有合法数字种子和最长的文本种子）。
-- `view_count` 和 `like_count` 是计数器列（降范），由应用层维护而非数据库触发器——触发器在 SQLite 中调试困难，在 PostgreSQL 中迁移时有额外步骤。
+- `view_count`、`like_count` 和 `collection_count` 是计数器列（降范），由应用层维护而非数据库触发器——触发器在 SQLite 中调试困难，在 PostgreSQL 中迁移时有额外步骤。
+- `collection_count` 在 `POST /collections/{id}/seeds/{seed_id}` 时 +1，`DELETE` 时 -1（最小为 0）。
 - `rejection_reason` 仅当 `status = 'rejected'` 时有值。投稿者在"我的投稿"中可见。
 - `approved_by` 记录审核人，用于审计。
 - 去重约束使用部分唯一索引（PostgreSQL）或应用层校验（SQLite），见 §6.2。
@@ -519,7 +521,8 @@ idx_comments_seed
 | `idx_seeds_edition_version` | seeds | `(edition, tested_version)` | B-Tree (composite) | 首页 + 浏览筛选 |
 | `idx_seeds_uploader` | seeds | `uploader_id` | B-Tree | "我的投稿" |
 | `idx_seeds_created` | seeds | `created_at DESC` | B-Tree | 最新排序 |
-| `idx_seeds_likes` | seeds | `like_count DESC` | B-Tree | 最热/最多点赞排序 |
+| `idx_seeds_likes` | seeds | `like_count DESC` | B-Tree | 最多点赞排序 |
+| `idx_seeds_collections` | seeds | `collection_count DESC` | B-Tree | 最多收藏排序 |
 | `idx_screenshots_seed` | screenshots | `seed_id` | B-Tree | 种子详情 JOIN |
 | `idx_screenshots_uploader` | screenshots | `uploader_id` | B-Tree | 临时图片清理 |
 | `idx_key_coords_seed` | key_coords | `seed_id` | B-Tree | 种子详情 JOIN |
