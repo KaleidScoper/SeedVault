@@ -211,6 +211,7 @@ idx_comments_seed
 │ title                │ VARCHAR(50)  │ NOT NULL                       │
 │ description          │ VARCHAR(500) │ NOT NULL                       │
 │ seed_value           │ VARCHAR(64)  │ NOT NULL                       │
+│ seed_numeric         │ BIGINT       │                                │
 │ edition              │ VARCHAR(16)  │ NOT NULL                       │
 │                      │              │ CHECK (edition IN              │
 │                      │              │   ('java', 'bedrock'))         │
@@ -223,7 +224,8 @@ idx_comments_seed
 │                      │              │    'superflat'))               │
 │ mod_env              │ VARCHAR(16)  │ NOT NULL DEFAULT 'vanilla'     │
 │                      │              │ CHECK (mod_env IN              │
-│                      │              │   ('vanilla', 'modpack'))      │
+│                      │              │   ('vanilla', 'modpack',       │
+│                      │              │    'neoforge'))                │
 │ modpack_name         │ VARCHAR(128) │                                │
 │ modpack_version      │ VARCHAR(32)  │                                │
 │ spawn_x              │ INTEGER      │ NOT NULL                       │
@@ -248,6 +250,7 @@ idx_comments_seed
 **设计要点**：
 
 - `seed_value` 使用 VARCHAR(64)，不设种子空间上限（文本种子可超过 64 字符，但 64 字符已覆盖所有合法数字种子和最长的文本种子）。
+- `seed_numeric` 为解析后的 64 位整数（纯数字种子），文本种子为 NULL。用于数值范围查询和数值比较排序，弥补 `seed_value` 作为字符串无法高效做数值比较的不足。应用层解析，不在数据库层触发。
 - `view_count`、`like_count` 和 `collection_count` 是计数器列（降范），由应用层维护而非数据库触发器——触发器在 SQLite 中调试困难，在 PostgreSQL 中迁移时有额外步骤。
 - `collection_count` 在 `POST /collections/{id}/seeds/{seed_id}` 时 +1，`DELETE` 时 -1（最小为 0）。
 - `rejection_reason` 仅当 `status = 'rejected'` 时有值。投稿者在"我的投稿"中可见。
@@ -506,6 +509,72 @@ idx_comments_seed
 
 `GET /users/me/bookmarks` 保持指向 `likes` 表："我赞过的种子"即"我想再次找到的种子"。这是上一轮讨论中确立的语义——点赞按钮的含义是"这个种子值得再次找到吗？"，重命名为收藏列表名正言顺。
 
+### 4.14 reports
+
+```
+┌─────────────────────┬──────────────┬────────────────────────────────┐
+│ 列                   │ 类型          │ 约束                            │
+├─────────────────────┼──────────────┼────────────────────────────────┤
+│ id                   │ INTEGER      │ PRIMARY KEY AUTOINCREMENT      │
+│ seed_id              │ INTEGER      │ NOT NULL REFERENCES seeds(id)  │
+│                      │              │   ON DELETE CASCADE            │
+│ reporter_id          │ INTEGER      │ REFERENCES users(id)           │
+│                      │              │   ON DELETE SET NULL           │
+│ reporter_ip_hash     │ VARCHAR(64)  │                                │
+│ reason               │ VARCHAR(32)  │ NOT NULL                       │
+│                      │              │ CHECK (reason IN               │
+│                      │              │   ('screenshot_mismatch',      │
+│                      │              │    'wrong_version',            │
+│                      │              │    'duplicate',                │
+│                      │              │    'inappropriate',            │
+│                      │              │    'other'))                   │
+│ detail               │ VARCHAR(500) │                                │
+│ status               │ VARCHAR(16)  │ NOT NULL DEFAULT 'pending'     │
+│                      │              │ CHECK (status IN               │
+│                      │              │   ('pending', 'reviewed',      │
+│                      │              │    'dismissed'))               │
+│ created_at           │ DATETIME     │ NOT NULL DEFAULT               │
+│                      │              │   CURRENT_TIMESTAMP            │
+└─────────────────────┴──────────────┴────────────────────────────────┘
+```
+
+**设计要点**：
+
+- `reporter_id` 可空——匿名用户也可以举报（以 `reporter_ip_hash` 标识）
+- 已登录用户同种子多次举报自动合并：`UNIQUE (seed_id, reporter_id)`（部分唯一索引，reporter_id IS NOT NULL 时生效）
+- 匿名举报合并：`UNIQUE (seed_id, reporter_ip_hash)`（匿名时生效）
+- `status` 供管理员在审核后台处理
+
+### 4.15 notifications
+
+```
+┌─────────────────────┬──────────────┬────────────────────────────────┐
+│ 列                   │ 类型          │ 约束                            │
+├─────────────────────┼──────────────┼────────────────────────────────┤
+│ id                   │ INTEGER      │ PRIMARY KEY AUTOINCREMENT      │
+│ user_id              │ INTEGER      │ NOT NULL REFERENCES users(id)  │
+│                      │              │   ON DELETE CASCADE            │
+│ type                 │ VARCHAR(32)  │ NOT NULL                       │
+│                      │              │ CHECK (type IN                 │
+│                      │              │   ('seed_approved',            │
+│                      │              │    'seed_rejected'))           │
+│ message              │ VARCHAR(255) │ NOT NULL                       │
+│ detail               │ VARCHAR(500) │                                │
+│ seed_id              │ INTEGER      │ REFERENCES seeds(id)           │
+│                      │              │   ON DELETE SET NULL           │
+│ is_read              │ BOOLEAN      │ NOT NULL DEFAULT FALSE          │
+│ created_at           │ DATETIME     │ NOT NULL DEFAULT               │
+│                      │              │   CURRENT_TIMESTAMP            │
+└─────────────────────┴──────────────┴────────────────────────────────┘
+```
+
+**设计要点**：
+
+- 通知为**被动拉取**模式（MVP 不做推送）。前端在登录后（`GET /auth/me` 响应含 `unread_count`）或点击通知图标时拉取
+- `seed_id` 在种子被删除时 SET NULL（通知保留，"该种子已被删除"代替链接）
+- `detail` 用于拒绝原因等补充信息
+- 通知不编辑不软删——标记已读为唯一操作
+
 ---
 
 ## 5. 索引策略
@@ -531,6 +600,8 @@ idx_comments_seed
 | `idx_collections_user` | collections | `(user_id, sort_order)` | B-Tree (composite) | 用户收藏夹列表 |
 | `idx_collection_seeds_coll` | collection_seeds | `(collection_id, added_at DESC)` | B-Tree (composite) | 收藏夹内容 + 封面计算 |
 | `idx_collection_seeds_seed` | collection_seeds | `seed_id` | B-Tree | 查看某种子被哪些收藏夹收录 |
+| `idx_reports_status` | reports | `status` | B-Tree | 管理员举报列表 |
+| `idx_notifications_user` | notifications | `(user_id, is_read, created_at DESC)` | B-Tree (composite) | 用户通知列表 |
 
 ### 5.2 复合索引设计原则
 
@@ -547,7 +618,7 @@ CREATE INDEX idx_comments_seed ON comments(seed_id, created_at);
 
 | 列 | 理由 |
 |----|------|
-| `seeds.mod_env` | 基数仅 2（vanilla / modpack），索引无意义——全表扫描比索引查找更快 |
+| `seeds.mod_env` | 基数仅 3（vanilla / modpack / neoforge），索引无意义——全表扫描比索引查找更快 |
 | `seeds.world_type` | 基数仅 3，同上 |
 | `seeds.compatible_range` | 不直接查询此列——用于展示而非筛选 |
 | `comments.author_id` | 无"查看某用户所有评论"功能——查询总是从种子侧出发 |
