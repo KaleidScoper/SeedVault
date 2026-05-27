@@ -77,27 +77,37 @@ edition VARCHAR(16) NOT NULL CHECK (edition IN ('java', 'bedrock'))
                     │  users   │
                     └────┬─────┘
                          │
-          ┌──────────────┼──────────────┐
-          │              │              │
-     uploader_id    author_id      user_id
-          │              │              │
-          ▼              ▼              ▼
-    ┌──────────┐  ┌──────────┐  ┌──────────┐
-    │  seeds   │  │ comments │  │  likes   │
-    └────┬─────┘  └──────────┘  └──────────┘
-         │
-    ┌────┴─────┬──────────┬────────────┐
-    │          │          │            │
-    ▼          ▼          ▼            ▼
+     ┌───────────────────┼───────────────────┐
+     │                   │                   │
+uploader_id         author_id           user_id
+     │                   │                   │
+     ▼                   ▼                   ▼
+┌──────────┐       ┌──────────┐       ┌──────────┐
+│  seeds   │       │ comments │       │  likes   │
+└────┬─────┘       └──────────┘       └──────────┘
+     │
+┌────┴─────┬──────────┬────────────┐
+│          │          │            │
+▼          ▼          ▼            ▼
 ┌────────┐ ┌────────┐ ┌──────────┐ ┌───────────┐
 │screen- │ │  key_  │ │seed_tags │ │seed_views │
 │ shots  │ │ coords │ │          │ │           │
 └────────┘ └────────┘ └────┬─────┘ └───────────┘
                            │
                            ▼
-                      ┌──────────┐
-                      │   tags   │
-                      └──────────┘
+                      ┌──────────┐            ┌─────────────┐
+                      │   tags   │            │ collections │
+                      └──────────┘            └──────┬──────┘
+                                                    │
+                                               user_id
+                                                    │
+                                          ┌─────────┴─────────┐
+                                          │                   │
+                                          ▼                   ▼
+                                   ┌──────────────┐   ┌──────────────┐
+                                   │  collection  │   │   seeds      │
+                                   │   _seeds     │───│  (via seed_id)│
+                                   └──────────────┘   └──────────────┘
 
 独立实体（无外键关联）:
   ┌──────────┐
@@ -112,10 +122,12 @@ edition VARCHAR(16) NOT NULL CHECK (edition IN ('java', 'bedrock'))
 | users → seeds | 1:N | 一个用户可以投稿多个种子 |
 | users → comments | 1:N | 一个用户可以发表多条评论 |
 | users → likes | 1:N | 一个用户可以点赞多个种子 |
+| users → collections | 1:N | 一个用户可以创建多个收藏夹 |
 | seeds → screenshots | 1:N | 一个种子有 1-5 张截图 |
 | seeds → key_coords | 1:N | 一个种子有 0-N 个关键坐标 |
 | seeds → comments | 1:N | 一个种子有多条评论 |
 | seeds ↔ tags | M:N | 通过 seed_tags 关联 |
+| seeds ↔ collections | M:N | 通过 collection_seeds 关联 |
 | seeds → seed_views | 1:N | 浏览记录 |
 
 ---
@@ -350,10 +362,12 @@ idx_comments_seed
 
 **设计要点**：
 
-- 此表同时作为"收藏"的数据源。一条记录完成两个语义：点赞 + 收藏。不做单独 bookmarks 表。
-- 用户删除 → 其所有点赞/收藏记录清除。
+- 点赞和收藏是两个独立语义。此表仅存储点赞关系。
+- `GET /users/me/bookmarks` 读取的是此表——"我赞过的种子"等价于"我想再次找到的种子"，语义清晰不混淆。
+- 用户创建的自定义收藏夹见 §4.11（`collections`）和 §4.12（`collection_seeds`）。
+- 用户删除 → 其所有点赞记录清除。
 - 种子删除 → 点赞记录清除，`seeds.like_count` 随 CASCADE 失效但数据库已无此种子，不影响查询。
-- `created_at` 记录点赞时间，支持"我的收藏"按时间排序。
+- `created_at` 记录点赞时间，支持按时间排序。
 
 ### 4.8 comments
 
@@ -419,6 +433,77 @@ idx_comments_seed
 - 去重逻辑：同一 `(seed_id, session_key)` 在 30 分钟内不重复计数。每次请求时先查询是否存在该时间段内的记录，若否则插入并 `UPDATE seeds SET view_count = view_count + 1`。
 - 定时任务（每 30 分钟）删除 `viewed_at < NOW() - 30 MINUTES` 的记录，控制表大小。
 
+### 4.11 collections
+
+```
+┌─────────────────────┬──────────────┬────────────────────────────────┐
+│ 列                   │ 类型          │ 约束                            │
+├─────────────────────┼──────────────┼────────────────────────────────┤
+│ id                   │ INTEGER      │ PRIMARY KEY AUTOINCREMENT      │
+│ user_id              │ INTEGER      │ NOT NULL REFERENCES users(id)  │
+│                      │              │   ON DELETE CASCADE            │
+│ name                 │ VARCHAR(50)  │ NOT NULL                       │
+│ description          │ VARCHAR(200) │                                │
+│ cover_strategy       │ VARCHAR(16)  │ NOT NULL DEFAULT 'last'        │
+│                      │              │ CHECK (cover_strategy IN       │
+│                      │              │   ('first', 'last', 'manual')) │
+│ cover_seed_id        │ INTEGER      │ REFERENCES seeds(id)           │
+│                      │              │   ON DELETE SET NULL           │
+│ is_public            │ BOOLEAN      │ NOT NULL DEFAULT FALSE          │
+│ sort_order           │ INTEGER      │ NOT NULL DEFAULT 0             │
+│ created_at           │ DATETIME     │ NOT NULL DEFAULT               │
+│                      │              │   CURRENT_TIMESTAMP            │
+│ updated_at           │ DATETIME     │                                │
+└─────────────────────┴──────────────┴────────────────────────────────┘
+```
+
+**设计要点**：
+
+- `cover_strategy` 决定收藏夹封面图的来源：
+  - `'first'`：使用收藏夹中第一个添加的种子封面
+  - `'last'`（默认）：使用最后一个添加的种子封面
+  - `'manual'`：由用户在已添加的种子中手动选择，此时 `cover_seed_id` 有值
+- `cover_seed_id` 仅当 `cover_strategy = 'manual'` 时有值（CHECK 约束在应用层强制）
+- `is_public`：用户可将收藏夹设为公开，生成分享链接供他人浏览
+- `sort_order`：用于前端拖拽排序收藏夹
+
+### 4.12 collection_seeds
+
+```
+┌─────────────────────┬──────────────┬────────────────────────────────┐
+│ 列                   │ 类型          │ 约束                            │
+├─────────────────────┼──────────────┼────────────────────────────────┤
+│ collection_id        │ INTEGER      │ NOT NULL REFERENCES            │
+│                      │              │   collections(id)              │
+│                      │              │   ON DELETE CASCADE            │
+│ seed_id              │ INTEGER      │ NOT NULL REFERENCES seeds(id)  │
+│                      │              │   ON DELETE CASCADE            │
+│ added_at             │ DATETIME     │ NOT NULL DEFAULT               │
+│                      │              │   CURRENT_TIMESTAMP            │
+│                      │              │ PRIMARY KEY (collection_id,    │
+│                      │              │   seed_id)                     │
+└─────────────────────┴──────────────┴────────────────────────────────┘
+```
+
+**设计要点**：
+
+- 标准 M:N 关联表。复合主键天然防止重复添加。
+- `added_at` 记录加入时间。`cover_strategy = 'first'` 时取 `MIN(added_at)` 的种子；`cover_strategy = 'last'` 时取 `MAX(added_at)` 的种子（默认）。
+- 双向 CASCADE：收藏夹或种子被删除 → 关联自动清除。
+
+### 4.13 likes 与 collections 的关系
+
+两条路径服务于两种用户意图：
+
+| 操作 | 表 | 语义 |
+|------|---|------|
+| "这个种子不错" | `likes` | 轻量认可，计入 `seeds.like_count` 热度分 |
+| "我要分类保存" | `collection_seeds` | 归档意图，组织到自定义收藏夹 |
+
+用户可以只点赞不归档（`likes` 有记录，`collection_seeds` 无记录），也可以只归档不点赞（反之），也可以同时做。两者正交——不互相依赖，不互相替代。
+
+`GET /users/me/bookmarks` 保持指向 `likes` 表："我赞过的种子"即"我想再次找到的种子"。这是上一轮讨论中确立的语义——点赞按钮的含义是"这个种子值得再次找到吗？"，重命名为收藏列表名正言顺。
+
 ---
 
 ## 5. 索引策略
@@ -440,6 +525,9 @@ idx_comments_seed
 | `idx_key_coords_seed` | key_coords | `seed_id` | B-Tree | 种子详情 JOIN |
 | `idx_comments_seed` | comments | `(seed_id, created_at)` | B-Tree (composite) | 评论区查询 |
 | `idx_seed_views_lookup` | seed_views | `(seed_id, session_key, viewed_at)` | B-Tree (composite) | 浏览去重 |
+| `idx_collections_user` | collections | `(user_id, sort_order)` | B-Tree (composite) | 用户收藏夹列表 |
+| `idx_collection_seeds_coll` | collection_seeds | `(collection_id, added_at DESC)` | B-Tree (composite) | 收藏夹内容 + 封面计算 |
+| `idx_collection_seeds_seed` | collection_seeds | `seed_id` | B-Tree | 查看某种子被哪些收藏夹收录 |
 
 ### 5.2 复合索引设计原则
 
@@ -665,27 +753,7 @@ CREATE TABLE seed_mods (
 
 ### 9.4 种子集合/收藏夹
 
-当前 `likes` 表是扁平结构。如果未来需要"用户创建多个收藏夹"功能：
-
-```sql
--- 未来可选扩展
-CREATE TABLE collections (
-  id          INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id     INTEGER NOT NULL REFERENCES users(id),
-  name        VARCHAR(50) NOT NULL,
-  is_public   BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE collection_seeds (
-  collection_id INTEGER NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
-  seed_id       INTEGER NOT NULL REFERENCES seeds(id) ON DELETE CASCADE,
-  added_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (collection_id, seed_id)
-);
-```
-
-现有 `likes` 表成为"默认收藏夹"：`WHERE user_id = ? AND collection_id IS NULL` 等价于当前的"我的收藏"。向后兼容——`likes` 表不需立即迁移。
+已于 §4.11 和 §4.12 实现。`likes` 表保持纯粹的点赞语义，收藏夹作为独立实体存在。两者的正交关系见 §4.13。
 
 ### 9.5 种子变更历史
 
