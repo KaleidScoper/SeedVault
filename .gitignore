@@ -7,7 +7,7 @@ dist/
 venv/
 
 # Backend
-backend/data.db
+backend/data.db*
 backend/uploads/screenshots/*.webp
 backend/.env
 
