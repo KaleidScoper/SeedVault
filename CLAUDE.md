@@ -8,6 +8,7 @@
 - `docs/interaction-design.md` — 交互设计（信息架构、浏览模型、详情页、认证墙、移动端、品牌、皮肤头像）
 - `docs/visual-style-guide.md` — 视觉风格指南（颜色系统、字体层级、组件标记、Microsoft 登录按钮、皮肤头像、禁止清单）
 - `docs/api-and-backend-design.md` — API 与后端设计（全部端点、请求/响应 Schema、数据库 DDL、存储层、Auth 中间件、服务层边界）
+- `docs/database-design.md` — 数据库设计（ERD、命名规范、表详细设计、索引策略、约束、查询模式、SQLite→PG 迁移、扩展性、种子数据）
 
 ## Agent Skills（来自 taste-skill）
 
