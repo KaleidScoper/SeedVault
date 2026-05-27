@@ -2,9 +2,10 @@
 
 面向中文社群的 Minecraft 种子投稿与检索平台，轻量自部署，GitHub 开源。
 
-## 技术栈
+## 项目文档
 
-待定（规划阶段）。详见 `docs/mc-seed-platform-plan.md`。
+- `docs/mc-seed-platform-plan.md` — 项目规划（技术机制、字段设计、架构、功能）
+- `docs/interaction-design.md` — 交互设计（信息架构、浏览模型、详情页、认证墙、移动端）
 
 ## Agent Skills（来自 taste-skill）
 
