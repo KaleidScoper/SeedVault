@@ -1,0 +1,1 @@
+Village A blacksmith chest contents: 3 diamonds, 5 iron ingots, obsidian. Inventory screen focused on the loot.

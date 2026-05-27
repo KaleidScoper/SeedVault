@@ -200,6 +200,7 @@ idx_comments_seed
 - `minecraft_uuid` 加 UNIQUE 约束——一个 Minecraft 账号不能绑定多个本站用户。反之不成立：一个 Microsoft 账号可以换绑不同 Minecraft 账号（存在 UNIQUE 但不强制关联）。
 - `microsoft_refresh_token` 加密存储（AES-256-GCM，密钥来自环境变量 `TOKEN_ENCRYPTION_KEY`）。不存明文。
 - 用户删除：不在 MVP 范围。被禁用户 (`is_banned = TRUE`) 不能签发新 JWT，现有 JWT 在下次请求时通过 `is_banned` 检查被拒。
+- **勘误（2026-05-28）**：`skin_model` 字段（`'steve' | 'alex'`）当前未在任何 API 响应中暴露给前端。mc-heads.net 已通过 UUID 自动返回正确的皮肤头像（含模型），前端无需额外处理。此字段保留用于未来可能的服务端皮肤渲染或统计用途。
 
 ### 4.2 seeds
 
@@ -251,6 +252,7 @@ idx_comments_seed
 
 - `seed_value` 使用 VARCHAR(64)，不设种子空间上限（文本种子可超过 64 字符，但 64 字符已覆盖所有合法数字种子和最长的文本种子）。
 - `seed_numeric` 为解析后的 64 位整数（纯数字种子），文本种子为 NULL。用于数值范围查询和数值比较排序，弥补 `seed_value` 作为字符串无法高效做数值比较的不足。应用层解析，不在数据库层触发。
+- **勘误（2026-05-28）**：`BIGINT` 在 SQLite 中无独立类型——SQLite 的 `INTEGER` 即为 64 位有符号整数，`BIGINT` 被当作 INTEGER affinity 处理，实际存储无差异。迁移至 PostgreSQL 时需改为 `BIGINT` 原生类型。SQLAlchemy 的 `BigInteger` 类型在两个方言上自动适配。
 - `view_count`、`like_count` 和 `collection_count` 是计数器列（降范），由应用层维护而非数据库触发器——触发器在 SQLite 中调试困难，在 PostgreSQL 中迁移时有额外步骤。
 - `collection_count` 在 `POST /collections/{id}/seeds/{seed_id}` 时 +1，`DELETE` 时 -1（最小为 0）。
 - `rejection_reason` 仅当 `status = 'rejected'` 时有值。投稿者在"我的投稿"中可见。
@@ -307,6 +309,7 @@ idx_comments_seed
 - `y` 可空——高度坐标在基岩版和 1.18 前的 Java 版有不同基准面，且许多投稿者不填高度。
 - 不做坐标范围约束（CHECK x BETWEEN ...）。Minecraft 世界边界在不同版本间变化（30,000,000 vs 3,000,000），数据库层不应硬编码游戏规则。校验在应用层 Pydantic schema 中完成。
 - 每条坐标是独立行而非 JSON 数组列——允许按坐标标签搜索、允许独立更新，且 SQLite 对 JSON 函数支持有限。
+- **勘误（2026-05-28）**：此表无 `sort_order` 字段，坐标展示顺序依赖 `id` 插入顺序。若未来需要投稿者自定义坐标排列，需 ALTER TABLE 新增该字段。
 
 ### 4.5 tags
 
@@ -620,14 +623,24 @@ CREATE INDEX idx_comments_seed ON comments(seed_id, created_at);
 |----|------|
 | `seeds.mod_env` | 基数仅 3（vanilla / modpack / neoforge），索引无意义——全表扫描比索引查找更快 |
 | `seeds.world_type` | 基数仅 3，同上 |
-| `seeds.compatible_range` | 不直接查询此列——用于展示而非筛选 |
+| `seeds.compatible_range` | 不直接查询此列——用于展示而非筛选（VARCHAR(32) 存储自由格式文本如 `"1.21.4 ~ 1.21.5"`，无程序可读性）。若未来需要基于兼容范围筛选，需拆分为 `compatible_version_min` + `compatible_version_max` 两个结构化字段。 |
 | `comments.author_id` | 无"查看某用户所有评论"功能——查询总是从种子侧出发 |
 
-### 5.4 部分唯一索引（PostgreSQL）
+### 5.4 部分唯一索引
+
+> **勘误（2026-05-28）**：初版声称"SQLite 不支持部分索引"，此陈述错误。SQLite 自 **3.8.0（2013 年）**起完整支持部分索引（Partial Indexes），语法为 `CREATE UNIQUE INDEX ... WHERE condition`，与 PostgreSQL 兼容。
 
 投稿去重规则："同一 `(seed_value, edition, tested_version)` 在非拒绝状态下只能有一条"。
 
-SQLite 不支持部分索引，因此去重必须在应用层校验：
+此约束可在 SQLite 和 PostgreSQL 上直接使用数据库层部分唯一索引：
+
+```sql
+CREATE UNIQUE INDEX idx_seeds_unique
+  ON seeds(seed_value, edition, tested_version)
+  WHERE status != 'rejected';
+```
+
+应用层校验保留作为防御性第二层（在调用数据库前先做 SELECT 检查，提供更友好的错误信息和 `existing_id`）：
 
 ```python
 # app/services/seeds.py
@@ -643,15 +656,7 @@ if existing.scalar():
     raise DuplicateSeedError(existing_id=...)
 ```
 
-迁移到 PostgreSQL 后，可替换为数据库层约束：
-
-```sql
-CREATE UNIQUE INDEX idx_seeds_unique
-  ON seeds(seed_value, edition, tested_version)
-  WHERE status != 'rejected';
-```
-
-应用层校验保留作为防御性第二层——即使在 PostgreSQL 上也不应仅依赖数据库约束做用户面校验。
+数据库层唯一索引提供最终保证（即使并发竞态条件下也能阻止重复插入），应用层校验提供更友好的用户反馈。
 
 ---
 
@@ -665,7 +670,7 @@ CREATE UNIQUE INDEX idx_seeds_unique
 | users | `role` | `IN ('user', 'admin')` |
 | seeds | `edition` | `IN ('java', 'bedrock')` |
 | seeds | `world_type` | `IN ('normal', 'large_biomes', 'superflat')` |
-| seeds | `mod_env` | `IN ('vanilla', 'modpack')` |
+| seeds | `mod_env` | `IN ('vanilla', 'modpack', 'neoforge')` |
 | seeds | `status` | `IN ('pending', 'approved', 'rejected')` |
 | screenshots | `status` | `IN ('pending', 'active', 'orphaned')` |
 | tags | `category` | `IN ('gameplay', 'feature', 'special')` |
@@ -739,6 +744,28 @@ ORDER BY s.like_count DESC;
 
 前端的多标签筛选是 AND 语义（"同时标记为生存和村庄"），不是 OR。
 
+#### 7.3.1 大版本模糊筛选
+
+> **勘误（2026-05-28）**：初版设计中 `GET /seeds` 的 `version` 参数仅支持精确匹配（如 `1.21.4`），无法按大版本（如 `1.21`）模糊筛选全部小版本。这与 mod/资源包社区"筛选主版本号，展示全部补丁版本内容"的用户习惯不符。新增此查询模式。
+
+```sql
+-- 精确版本 (version=1.21.4)
+SELECT s.* FROM seeds s
+WHERE s.status = 'approved'
+  AND s.tested_version = '1.21.4';
+
+-- 大版本模糊 (version=1.21) — 匹配 1.21.0, 1.21.1, 1.21.4, 1.21.5 等全部小版本
+SELECT s.* FROM seeds s
+WHERE s.status = 'approved'
+  AND s.tested_version LIKE '1.21.%';   -- SQLite
+-- 或 s.tested_version ~ '^1\.21\.'     -- PostgreSQL regex
+```
+
+实现策略：
+- 后端检测 `version` 参数的格式：两段式（`X.Y`）→ 模糊匹配 `X.Y.%`；三段式（`X.Y.Z`）→ 精确匹配
+- `versions` 表不受影响——它存储完整三段式版本号，模糊匹配仅作用于 `seeds.tested_version` 字段
+- 前端版本号筛选器默认展示大版本号（如 "1.21"），展开后显示精确小版本。选择 "1.21" 等价于 `?version=1.21`（模糊），选择 "1.21.4" 等价于 `?version=1.21.4`（精确）
+
 ### 7.4 连接池与事务
 
 - SQLite 默认单写者模式。MVP 阶段并发量低（< 100 并发用户），WAL 模式 + 单连接已足够。
@@ -772,7 +799,7 @@ ORDER BY s.like_count DESC;
 | 主键自增 | `AUTOINCREMENT` | `SERIAL` / `GENERATED ALWAYS AS IDENTITY` | 替换 DDL |
 | 布尔类型 | `BOOLEAN` (实际是 INTEGER) | `BOOLEAN` (原生) | 无需改动，SQLAlchemy 自动适配 |
 | 日期函数 | `julianday()` | `EXTRACT(EPOCH FROM ...)` | 热度分 SQL 表达式替换 |
-| 部分索引 | 不支持 | `CREATE UNIQUE INDEX ... WHERE` | 新增去重约束 |
+| 部分索引 | 支持（≥3.8.0, 2013） | `CREATE UNIQUE INDEX ... WHERE` | 无需迁移，语法兼容 |
 | WAL 模式 | `PRAGMA journal_mode=WAL` | 内置 | SQLite 特化配置 |
 | 连接字符串 | `sqlite:///data.db` | `postgresql://user:pass@host/db` | 环境变量切换 |
 
