@@ -1,0 +1,44 @@
+# SeedVault — Minecraft 种子共享平台
+
+面向中文社群的 Minecraft 种子投稿与检索平台，轻量自部署，GitHub 开源。
+
+## 技术栈
+
+待定（规划阶段）。详见 `docs/mc-seed-platform-plan.md`。
+
+## Agent Skills（来自 taste-skill）
+
+项目 `.claude/skills/` 目录下导入了 [taste-skill](https://github.com/Leonxlnx/taste-skill) 的全部前端设计技能，用于在构建 UI 时指导 AI 生成高质量、非模板化的界面。
+
+### 实现类技能（输出代码）
+
+| 技能 | 目录 | 用途 |
+|------|------|------|
+| **taste-skill** | `taste-skill/` | 默认前端设计技能（v2），读取需求 → 推断设计语言 → 输出界面 |
+| **taste-skill-v1** | `taste-skill-v1/` | taste-skill 原始 v1 版本，供需要固定行为的场景使用 |
+| **gpt-tasteskill** | `gpt-tasteskill/` | 更强制的变体，高布局方差、GSAP 动效 |
+| **image-to-code-skill** | `image-to-code-skill/` | 图片优先流程：生成参考 → 分析 → 实现 |
+| **redesign-skill** | `redesign-skill/` | 现有项目 UI 审查与重构 |
+| **soft-skill** | `soft-skill/` | 高端柔和 UI：低对比、留白、Spring 动效 |
+| **output-skill** | `output-skill/` | 禁止截断输出，强制完整代码生成 |
+| **minimalist-skill** | `minimalist-skill/` | 极简编辑风 UI（Notion/Linear 风格） |
+| **brutalist-skill** | `brutalist-skill/` | 粗野主义：瑞士字体、极端对比、实验性布局 |
+| **stitch-skill** | `stitch-skill/` | Google Stitch 兼容设计规则 |
+
+### 图片生成类技能（仅输出参考图，不写代码）
+
+| 技能 | 目录 | 用途 |
+|------|------|------|
+| **imagegen-frontend-web** | `imagegen-frontend-web/` | 网站设计参考图 |
+| **imagegen-frontend-mobile** | `imagegen-frontend-mobile/` | 移动端设计参考图 |
+| **brandkit** | `brandkit/` | 品牌套件（Logo、配色、字体）参考图 |
+
+### 使用方式
+
+在对话中附加对应技能文件或通过 skill 名称引用即可激活。示例：
+
+- "用 taste-skill 帮我设计种子详情页"
+- "用 minimalist-skill 构建搜索页面"
+- "用 output-skill 确保生成完整代码"
+
+详见各技能目录下的 `SKILL.md` 及 `llms.txt` 索引。
