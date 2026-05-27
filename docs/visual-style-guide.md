@@ -433,6 +433,76 @@ Java:  ┌───────────────┐    Bedrock: ┌──
 - 脉冲动画：`opacity 1 → 0.5 → 1`，周期 1.5s，ease-in-out
 - 不使用渐变动画（"shimmer"效果），纯色脉冲更安静
 
+### 7.8 Microsoft 登录按钮
+
+遵循 Microsoft 官方品牌准则。使用 Microsoft 提供的官方 SVG Logo 资源（不可修改、不可自绘）。
+
+```
+┌─────────────────────────────────┐
+│  [Microsoft Logo SVG]           │  底色: #FFFFFF（或跟随项目 neutral-0）
+│  Sign in with Microsoft         │  文字: #5E5E5E, Segoe UI 15px, weight 600
+│                                 │  边框: 1px solid #8C8C8C
+└─────────────────────────────────┘  radius-sm
+```
+
+| 属性 | 值 |
+|------|---|
+| 字体 | 项目系统字体栈（Segoe UI / San Francisco / PingFang SC）15px, weight 600 |
+| 文字色 | `#5E5E5E` |
+| 底色 | 跟随页面背景（`neutral-0`），保持与其他按钮一致的视觉环境 |
+| 边框 | `1px solid #8C8C8C` |
+| Logo | Microsoft 官方 SVG（可从 Microsoft 品牌门户下载） |
+| 最小宽度 | 240px（确保文字和 Logo 不拥挤） |
+| 高度 | 44px |
+
+**暗色模式**：文字色切换为 `#FFFFFF`，底色切换为 `#2F2F2F`（使用 Microsoft 暗色主题规格），去除边框。
+
+**设计决策**：字体栈与项目系统字体保持一致而非强制 Segoe UI（Microsoft Q&A 中对此有宽容——"using a single system font across all auth provider buttons is acceptable"）。
+
+### 7.9 Minecraft 皮肤头像
+
+头像来自 `mc-heads.net/avatar/{uuid}/{size}`。这是像素艺术（8×8 面部），必须保持方形或小圆角，不能裁切成圆形。
+
+```
+┌──────┐     ┌──────┐     ┌──────────┐
+│      │     │      │     │          │
+│  🧑  │     │  🧑  │     │    🧑    │
+│      │     │      │     │          │
+└──────┘     └──────┘     └──────────┘
+ 24px         32px          80px
+卡片投稿者    导航栏        用户主页
+```
+
+| 场景 | 尺寸 | 圆角 | 来源 |
+|------|------|------|------|
+| 卡片投稿者 | 24px | `radius-sm` (4px) | `mc-heads.net/avatar/{uuid}/24` |
+| 导航栏 | 32px | `radius-sm` (4px) | `mc-heads.net/avatar/{uuid}/32` |
+| 评论区 | 28px | `radius-sm` (4px) | `mc-heads.net/avatar/{uuid}/28` |
+| 用户主页 | 80px | `radius-sm` (4px) | `mc-heads.net/avatar/{uuid}/80` |
+
+**降级策略**：
+- 未绑定 Minecraft 正版 → 使用 Microsoft 账户头像（若有），圆形 + 首字母 fallback
+- Microsoft 头像也无 → 使用首字母头像（底色 `primary-100` + 文字 `primary-600`，**圆形**）
+- 降级头像使用圆形，与 Minecraft 皮肤头像的方形形成有意差异——方形头像本身就是"正版玩家"的视觉信号
+
+### 7.10 "正版玩家"徽章
+
+```
+┌────────────────────┐
+│ 🎮 Java 版正版玩家  │
+└────────────────────┘
+```
+
+| 属性 | 值 |
+|------|---|
+| 文字色 | `success` (#16a34a) |
+| 底色 | `java-green-bg` (#f0fdf4) |
+| 形状 | `radius-full` pill |
+| 字号 | `text-xs` (12px), weight 500 |
+| 内边距 | 2px 10px |
+
+复用 `java-green` 系的颜色（与版本徽章共享"信任/正确/Java"的语义），不是新颜色。
+
 ---
 
 ## 8. 动效原则
@@ -523,6 +593,9 @@ transition: background-color 150ms ease-out,
 - 卡片默认带 1px `neutral-700` 边框（暗色下默认无边框的卡片会融入背景）
 - 阴影在暗色下增大透明度偏移（`rgba(0,0,0,0.12)` → `rgba(0,0,0,0.30)` 等效，因为暗色背景下阴影天生更不明显）
 - Java 版徽章底色：`#052e16`（深绿）；Bedrock 徽章底色：`#451a03`（深琥珀）
+- "正版玩家"徽章底色：`#052e16`（同 Java 徽章深色底色）
+- Microsoft 登录按钮：文字 `#FFFFFF`，底色 `#2F2F2F`，无边框（使用 Microsoft 暗色主题规格）
+- mc-heads.net 头像 URL 不变（该服务返回的图片本身在暗色背景下自然显示良好，皮肤头像不做透明度处理）
 - Toast 底色保持 `neutral-800`（在暗色模式下不变，因为已足够深）
 
 ### 10.4 模式切换

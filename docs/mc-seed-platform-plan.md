@@ -337,7 +337,8 @@ uploader_note     投稿者补充（任意文本）
 | 数据库 | **SQLite**（开发/小规模）→ **PostgreSQL**（可选升级路径） | SQLite 零配置，单文件，适合开源项目 |
 | ORM | **SQLAlchemy 2.x + Alembic**（数据库迁移） | 成熟，迁移到 PG 无痛 |
 | 图片存储 | 本地 `/uploads` 目录（开发）→ S3 兼容接口（生产） | 通过环境变量切换，零代码改动 |
-| 认证 | **JWT**（HTTP-only Cookie） | 无状态，轻量 |
+| 认证 | **Microsoft OAuth 2.0** → 内部 JWT（HTTP-only Cookie） | Microsoft 账户登录，可选 Minecraft 正版验证获取皮肤头像 |
+| HTTP 客户端 | **httpx** | 异步，用于调用 Microsoft / Xbox / Minecraft API |
 | 部署 | **单 Docker Compose 文件**，前端 build 后由 FastAPI 托管静态文件，或用 Caddy 反代 | 一键部署，无 Nginx |
 
 ### 4.3 目录结构
@@ -361,7 +362,7 @@ mc-seed-hub/
 │   │   ├── schemas.py         # Pydantic 请求/响应模型
 │   │   ├── routers/
 │   │   │   ├── seeds.py       # 种子 CRUD
-│   │   │   ├── auth.py        # 注册/登录/JWT
+│   │   │   ├── auth.py        # Microsoft OAuth / JWT 签发 / Minecraft 验证
 │   │   │   ├── upload.py      # 图片上传
 │   │   │   └── admin.py       # 审核后台
 │   │   ├── services/
@@ -381,8 +382,20 @@ mc-seed-hub/
 ### 4.4 数据库模型（核心表）
 
 ```sql
--- 用户表
-users (id, username, email, password_hash, role, created_at)
+-- 用户表（Microsoft OAuth，无密码）
+users (
+  id,                       -- 内部主键
+  microsoft_id,             -- Microsoft 账户唯一 ID（OAuth 返回）
+  email,                    -- Microsoft 账户邮箱
+  display_name,             -- Microsoft 账户显示名
+  minecraft_uuid,           -- Minecraft 玩家 UUID（可空，未拥有 MC 则为 NULL）
+  minecraft_username,       -- 游戏内 ID（可空）
+  owns_java_edition,        -- BOOLEAN，来自 /entitlements/mcstore，非用户声称
+  skin_model,               -- 'steve' | 'alex'（可空）
+  role,                     -- 'user' | 'admin'
+  created_at,
+  last_login_at
+)
 
 -- 种子表（核心）
 seeds (
@@ -441,6 +454,83 @@ services:
 
 ---
 
+### 4.6 Microsoft OAuth + Minecraft 正版验证流程
+
+#### 4.6.1 登录流程（五次 API 调用）
+
+```
+用户点击"使用 Microsoft 账号登录"
+  │
+  ├─ ① Microsoft OAuth 授权
+  │   GET https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize
+  │     ?client_id={CLIENT_ID}&response_type=code&redirect_uri={REDIRECT_URI}
+  │     &scope=XboxLive.signin%20offline_access
+  │   用户授权 → Microsoft 重定向回 callback 并携带 code
+  │
+  ├─ ② Token 交换
+  │   POST https://login.microsoftonline.com/consumers/oauth2/v2.0/token
+  │     grant_type=authorization_code&code={CODE}
+  │   返回: access_token, refresh_token
+  │
+  ├─ ③ Xbox Live 认证
+  │   POST https://user.auth.xboxlive.com/user/authenticate
+  │     (用 Microsoft access_token 换取 XBL token)
+  │   返回: xbl_token
+  │
+  ├─ ④ XSTS 认证
+  │   POST https://xsts.auth.xboxlive.com/xsts/authorize
+  │     (用 xbl_token 换取 XSTS token)
+  │   返回: xsts_token, xuid
+  │
+  ├─ ⑤ Minecraft 服务认证 + 信息获取
+  │   POST https://api.minecraftservices.com/authentication/login
+  │     (用 xsts_token 换取 Minecraft access_token)
+  │   返回: minecraft_access_token
+  │
+  │   GET https://api.minecraftservices.com/entitlements/mcstore
+  │     Authorization: XBL3.0 x={xuid};{token}
+  │   返回: 是否拥有 Java 版正版
+  │
+  │   GET https://api.minecraftservices.com/minecraft/profile
+  │     Authorization: Bearer {minecraft_access_token}
+  │   返回: { id: "minecraft-uuid", name: "player-name" }
+  │
+  └─ ⑥ 后端处理
+       - 用 microsoft_id 查找或创建用户记录
+       - 更新 minecraft_uuid, minecraft_username, owns_java_edition
+       - 签发本站 JWT（HTTP-only Cookie）
+       - 头像 URL 从 minecraft_uuid 派生: https://mc-heads.net/avatar/{uuid}/80
+```
+
+#### 4.6.2 头像服务
+
+mc-heads.net 为公开免费服务，基于 Minecraft UUID 提供皮肤头像：
+
+```
+https://mc-heads.net/avatar/{uuid}            2D 面部（默认尺寸）
+https://mc-heads.net/avatar/{uuid}/{size}     指定尺寸（8–600px）
+https://mc-heads.net/avatar/{uuid}/nohelm     不显示头盔层
+https://mc-heads.net/head/{uuid}              等距 3D 头部
+```
+
+UUID 使用带连字符格式（如 `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`），因为用户名可变而 UUID 不可变。
+
+#### 4.6.3 基础设施要求
+
+- **Azure AD 应用注册**：获取 `client_id` 和 `client_secret`
+- **重定向 URI**：`https://<domain>/auth/callback`
+- **API 权限**：`XboxLive.signin`（delegated）
+- **环境变量**：`MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`, `MICROSOFT_REDIRECT_URI`
+
+#### 4.6.4 设计决策
+
+- **无密码存储**：用户凭证完全委托给 Microsoft，本站无 `password_hash` 字段
+- **正版验证非强制**：未拥有 Java 版的用户仍可正常使用（浏览、投稿、点赞），仅无皮肤头像和正版标识
+- **首次登录自动注册**：不存在独立的"注册"步骤——输入 Microsoft 账号即为注册
+- **Token 刷新**：Microsoft refresh_token 有效期较长，后端应在 access_token 过期前自动轮换
+
+---
+
 ## 5. GUI 结构与功能设计
 
 ### 5.1 页面地图
@@ -452,7 +542,7 @@ services:
 /submit          投稿页（需登录）
 /user/:username  用户主页
 /admin           审核后台（管理员）
-/login /register 认证页
+/login           认证页（仅 Microsoft OAuth 入口，无注册表单）
 ```
 
 ### 5.2 各页面详细设计
@@ -624,7 +714,8 @@ OG 描述：自动截取种子描述前 120 字
 - 种子列表页（含基础筛选：版本端、版本号、玩法标签）
 - 种子详情页（含截图、坐标、一键复制种子值）
 - 投稿表单（完整字段，人工审核）
-- 简单的用户注册/登录（仅用于投稿和点赞）
+- Microsoft OAuth 登录（首次登录自动注册，无需独立注册流程）
+- Minecraft Java 版正版验证（可选，通过后显示皮肤头像 + 正版标识）
 - 管理员审核后台
 
 **可以后期迭代**：
