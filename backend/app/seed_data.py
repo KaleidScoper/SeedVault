@@ -52,25 +52,25 @@ async def seed_all(db: AsyncSession):
     # ═══ Tags ═══
     tag_data = [
         # gameplay
-        ("survival", "生存向", "🏕️", "gameplay"),
-        ("speedrun", "速通向", "⚔️", "gameplay"),
-        ("building", "建筑向", "🏗️", "gameplay"),
-        ("hardcore", "极限模式", "💀", "gameplay"),
-        ("challenge", "挑战向", "🎯", "gameplay"),
+        ("survival", "生存向", "■", "gameplay"),
+        ("speedrun", "速通向", "▲", "gameplay"),
+        ("building", "建筑向", "◆", "gameplay"),
+        ("hardcore", "极限模式", "✛", "gameplay"),
+        ("challenge", "挑战向", "◎", "gameplay"),
         # feature
-        ("spawn_wonder", "出生点奇观", "🌄", "feature"),
-        ("rare_biome", "稀有群系", "🍄", "feature"),
-        ("terrain", "地形奇观", "🏔️", "feature"),
-        ("village", "近出生点村庄", "🏘️", "feature"),
-        ("stronghold", "近出生点要塞", "🏰", "feature"),
-        ("ancient_city", "古代城市", "🏛️", "feature"),
-        ("trial_chamber", "试炼室集群", "⚗️", "feature"),
-        ("diamond", "资源富集", "💎", "feature"),
-        ("island", "孤岛生存", "🌊", "feature"),
+        ("spawn_wonder", "出生点奇观", "△", "feature"),
+        ("rare_biome", "稀有群系", "◇", "feature"),
+        ("terrain", "地形奇观", "▲", "feature"),
+        ("village", "近出生点村庄", "▦", "feature"),
+        ("stronghold", "近出生点要塞", "◈", "feature"),
+        ("ancient_city", "古代城市", "▫", "feature"),
+        ("trial_chamber", "试炼室集群", "◌", "feature"),
+        ("diamond", "资源富集", "◆", "feature"),
+        ("island", "孤岛生存", "≈", "feature"),
         # special (system-managed)
-        ("verified", "已验证", "✅", "special"),
-        ("hot", "热门", "🔥", "special"),
-        ("new", "新版本", "🆕", "special"),
+        ("verified", "已验证", "✓", "special"),
+        ("hot", "热门", "!", "special"),
+        ("new", "新版本", "+", "special"),
     ]
     tag_objs = {}
     for key, label, icon, cat in tag_data:

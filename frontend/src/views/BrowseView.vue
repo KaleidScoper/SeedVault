@@ -198,39 +198,53 @@ function randomSeed() {
 </template>
 
 <style scoped>
-.browse { display: flex; gap: 32px; }
+.browse { display: flex; gap: 24px; }
 .filter-panel {
   width: 220px; flex-shrink: 0;
   position: sticky; top: 80px; align-self: flex-start;
+  max-height: calc(100vh - 100px); overflow-y: auto;
 }
 .filter-group { margin-bottom: 20px; }
 .filter-group label {
-  display: block; font-size: 13px; font-weight: 500; color: var(--color-text-label); margin-bottom: 6px;
+  display: block;
+  font-family: var(--font-micro); font-size: 0.6rem;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--ink-dim); margin-bottom: 6px;
 }
-.chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip-group { display: flex; flex-wrap: wrap; gap: 4px; }
 .chip {
-  padding: 3px 10px; border: 1px solid var(--color-border); border-radius: 4px;
-  background: var(--color-bg-surface); font-size: 12px; color: var(--color-text-secondary); cursor: pointer;
-  transition: all 150ms;
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  background: var(--paper);
+  font-family: var(--font-micro); font-size: 0.65rem;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--ink-dim); cursor: pointer;
+  transition: background 80ms, color 80ms;
 }
-.chip:hover { border-color: var(--color-border-hover); }
-.chip.active { background: var(--color-primary-light); border-color: var(--color-border-active); color: var(--color-primary-dark); }
+.chip:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.chip.active { background: var(--ink); color: var(--paper); }
+.chip.active:hover { background: var(--red); border-color: var(--red); }
 .content { flex: 1; min-width: 0; }
 .top-bar {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 20px;
 }
 .sort-area { display: flex; gap: 8px; align-items: center; }
-.result-count { font-size: 13px; color: var(--color-text-muted); }
+.result-count {
+  font-family: var(--font-micro); font-size: 0.65rem;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--ink-dim);
+}
 .seed-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(256px, 1fr));
-  gap: 20px;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
 }
 .pagination { display: flex; justify-content: center; margin-top: 40px; }
 @media (max-width: 768px) {
   .browse { flex-direction: column; }
   .filter-panel { width: 100%; position: static; }
-  .filter-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 }
 </style>

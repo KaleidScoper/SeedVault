@@ -6,7 +6,7 @@ import { useThemeStore } from '@/stores/theme'
 import {
   NDropdown, NButton, NAvatar, NBadge, NIcon, NPopover,
 } from 'naive-ui'
-import { Diamond, Search, LogIn, LogOut, Add, FolderOpen, ShieldCheckmark, Heart } from '@vicons/ionicons5'
+import { Diamond, Search, LogIn, LogOut, Add, Heart } from '@vicons/ionicons5'
 import type { Component } from 'vue'
 import ThemeToggle from './ThemeToggle.vue'
 
@@ -14,7 +14,7 @@ const router = useRouter()
 const auth = useAuthStore()
 const theme = useThemeStore()
 
-const logoColor = computed(() => theme.isDark ? '#60a5fa' : '#3b82f6')
+const logoColor = computed(() => theme.isDark ? '#EAEAEA' : '#0A0A0A')
 
 const showSearch = ref(false)
 const searchQuery = ref('')
@@ -34,8 +34,6 @@ function renderIcon(icon: Component) {
 const userMenuOptions = [
   { label: '我的投稿', key: 'seeds', icon: renderIcon(Add) },
   { label: '我赞过的', key: 'likes', icon: renderIcon(Heart) },
-  { label: '收藏夹', key: 'collections', icon: renderIcon(FolderOpen) },
-  ...(auth.isAdmin ? [{ label: '管理后台', key: 'admin', icon: renderIcon(ShieldCheckmark) }] : []),
   { type: 'divider' as const, key: 'd1' },
   { label: '退出登录', key: 'logout', icon: renderIcon(LogOut) },
 ]
@@ -44,8 +42,6 @@ function handleUserSelect(key: string) {
   switch (key) {
     case 'seeds': router.push('/browse?my=1'); break
     case 'likes': router.push('/browse?liked=1'); break
-    case 'collections': router.push('/collections'); break
-    case 'admin': router.push('/admin'); break
     case 'logout': auth.logout(); router.push('/'); break
   }
 }
@@ -63,6 +59,8 @@ function handleUserSelect(key: string) {
       <div class="nav-center">
         <router-link to="/browse" class="nav-link">浏览</router-link>
         <router-link to="/submit" class="nav-link">投稿</router-link>
+        <router-link to="/collections" class="nav-link">收藏夹</router-link>
+        <router-link v-if="auth.isAdmin" to="/admin" class="nav-link">审核</router-link>
       </div>
       <div class="nav-right">
         <ThemeToggle />
@@ -113,29 +111,40 @@ function handleUserSelect(key: string) {
 <style scoped>
 .navbar {
   position: sticky; top: 0; z-index: 100;
-  background: var(--color-bg-nav); backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--color-border);
+  background: var(--paper);
+  border-bottom: 2px solid var(--border);
 }
 .navbar-inner {
-  max-width: 1152px; margin: 0 auto; padding: 0 24px;
-  height: 56px; display: flex; align-items: center; gap: 32px;
+  max-width: 1280px; margin: 0 auto; padding: 0 24px;
+  height: 56px; display: flex; align-items: center; gap: 0;
 }
 .nav-left { display: flex; align-items: center; }
 .nav-logo {
-  display: flex; align-items: center; gap: 8px; text-decoration: none;
-  font-size: 18px; font-weight: 600; color: var(--color-text-heading); letter-spacing: 0.04em;
+  display: flex; align-items: center; gap: 10px; text-decoration: none;
+  font-family: var(--font-macro); font-size: 1.1rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink);
 }
-.nav-center { display: flex; gap: 4px; }
+.nav-center {
+  display: flex; gap: 0; margin-left: 32px;
+  border: 1px solid var(--border);
+}
 .nav-link {
-  padding: 6px 16px; border-radius: 6px; text-decoration: none;
-  font-size: 15px; color: var(--color-text-body); transition: background 150ms;
+  padding: 7px 18px; text-decoration: none;
+  font-family: var(--font-micro); font-size: 0.7rem; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--ink);
+  border-right: 1px solid var(--border);
+  transition: background 80ms, color 80ms;
 }
-.nav-link:hover, .nav-link.router-link-active { background: var(--color-bg-nav-hover); color: var(--color-primary); }
+.nav-link:last-child { border-right: none; }
+.nav-link:hover, .nav-link.router-link-active { background: var(--ink); color: var(--paper); }
 .nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
 .search-popup { display: flex; gap: 8px; padding: 8px; }
 .search-input {
-  border: 1px solid var(--color-border); border-radius: 6px; padding: 6px 12px;
-  width: 260px; font-size: 14px; outline: none; background: var(--color-bg-surface); color: var(--color-text-body);
+  border: 1px solid var(--border); padding: 6px 12px;
+  width: 260px; font-size: 0.75rem; outline: none;
+  background: var(--paper); color: var(--ink);
+  font-family: var(--font-micro); letter-spacing: 0.04em;
 }
-.search-input:focus { border-color: var(--color-primary); }
+.search-input:focus { border-width: 2px; padding: 5px 11px; }
+.search-input::placeholder { color: var(--ink-faint); }
 </style>

@@ -99,15 +99,35 @@ async function doReject() {
 </template>
 
 <style scoped>
-.admin-page { max-width: 800px; margin: 0 auto; }
+.admin-page { max-width: 900px; margin: 0 auto; }
 .page-header { margin-bottom: 24px; }
-.page-header h1 { font-size: 24px; font-weight: 600; color: var(--color-text-heading); display: flex; align-items: center; gap: 8px; }
-.pending-list { display: flex; flex-direction: column; gap: 12px; }
-.pending-row {
-  background: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: 8px;
-  padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
+.page-header h1 {
+  font-family: var(--font-macro); font-size: 1.8rem; font-weight: 800;
+  text-transform: uppercase; color: var(--ink);
+  display: flex; align-items: center; gap: 8px;
 }
-.row-info h3 { font-size: 16px; font-weight: 500; margin-bottom: 6px; color: var(--color-text-heading); }
-.row-meta { display: flex; gap: 16px; font-size: 12px; color: var(--color-text-muted); align-items: center; }
+.pending-list {
+  display: flex; flex-direction: column;
+  border: 1px solid var(--border);
+}
+.pending-row {
+  background: var(--paper); padding: 16px 20px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+.pending-row:last-child { border-bottom: none; }
+.pending-row:hover { background: var(--ink); }
+.pending-row:hover .row-info h3,
+.pending-row:hover .row-meta { color: var(--paper); }
+
+.row-info h3 {
+  font-family: var(--font-macro); font-size: 0.95rem; font-weight: 700;
+  margin-bottom: 6px; color: var(--ink);
+}
+.row-meta {
+  display: flex; gap: 16px;
+  font-family: var(--font-micro); font-size: 0.65rem;
+  color: var(--ink-dim); align-items: center;
+}
 .row-actions { display: flex; gap: 8px; }
 </style>

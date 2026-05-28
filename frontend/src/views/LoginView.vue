@@ -56,12 +56,25 @@ async function doDevLogin() {
   min-height: 60vh;
 }
 .login-card {
-  width: 400px; background: var(--color-bg-surface); border: 1px solid var(--color-border);
-  border-radius: 8px; padding: 40px;
+  width: 420px; background: var(--paper);
+  border: 2px solid var(--border); padding: 40px;
 }
-h1 { font-size: 22px; font-weight: 600; text-align: center; margin-bottom: 8px; color: var(--color-text-heading); }
-.subtitle { text-align: center; font-size: 14px; color: var(--color-text-muted); margin-bottom: 32px; }
+h1 {
+  font-family: var(--font-macro); font-size: 1.4rem; font-weight: 800;
+  text-transform: uppercase; text-align: center;
+  margin-bottom: 8px; color: var(--ink);
+}
+.subtitle {
+  text-align: center;
+  font-family: var(--font-micro); font-size: 0.7rem;
+  color: var(--ink-dim); margin-bottom: 32px;
+  letter-spacing: 0.04em;
+}
 .dev-section { margin-top: 8px; }
-.dev-label { font-size: 12px; color: var(--color-text-muted); margin-bottom: 8px; text-align: center; }
+.dev-label {
+  font-family: var(--font-micro); font-size: 0.6rem;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--ink-dim); margin-bottom: 8px; text-align: center;
+}
 .dev-row { display: flex; gap: 8px; }
 </style>

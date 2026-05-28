@@ -249,20 +249,46 @@ async function submit() {
 </template>
 
 <style scoped>
-.submit-page { max-width: 640px; margin: 0 auto; }
-h1 { font-size: 24px; font-weight: 600; color: var(--color-text-heading); margin-bottom: 8px; }
-.step-content { background: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: 8px; padding: 32px; }
-.form-row { margin-bottom: 20px; }
-.form-row label { display: block; font-size: 14px; font-weight: 500; color: var(--color-text-label); margin-bottom: 6px; }
-.required { color: var(--color-danger); }
-.hint { font-size: 12px; color: var(--color-text-muted); margin-top: 4px; }
-.coord-inputs { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
-.chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip {
-  padding: 6px 14px; border: 1px solid var(--color-border); border-radius: 6px;
-  background: var(--color-bg-surface); font-size: 14px; color: var(--color-text-body); cursor: pointer; transition: all 150ms;
+.submit-page { max-width: 720px; margin: 0 auto; }
+h1 {
+  font-family: var(--font-macro); font-size: 1.8rem; font-weight: 800;
+  text-transform: uppercase; color: var(--ink); margin-bottom: 8px;
 }
-.chip:hover { border-color: var(--color-border-hover); }
-.chip.active { background: var(--color-primary-light); border-color: var(--color-border-active); color: var(--color-primary-dark); }
-.step-actions { display: flex; justify-content: space-between; margin-top: 32px; }
+.step-content {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  padding: 32px;
+}
+.form-row { margin-bottom: 24px; }
+.form-row label {
+  display: block;
+  font-family: var(--font-micro); font-size: 0.65rem;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--ink); margin-bottom: 8px;
+}
+.required { color: var(--red); }
+.hint {
+  font-family: var(--font-micro); font-size: 0.65rem;
+  color: var(--ink-faint); margin-top: 4px;
+  letter-spacing: 0.04em;
+}
+.coord-inputs { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.chip-group { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  background: var(--paper);
+  font-family: var(--font-micro); font-size: 0.7rem;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--ink); cursor: pointer;
+  transition: background 80ms, color 80ms;
+}
+.chip:hover { background: var(--ink); color: var(--paper); }
+.chip.active { background: var(--ink); color: var(--paper); }
+.chip.active:hover { background: var(--red); border-color: var(--red); }
+.step-actions {
+  display: flex; justify-content: space-between;
+  margin-top: 32px; padding-top: 24px;
+  border-top: 2px solid var(--border);
+}
 </style>

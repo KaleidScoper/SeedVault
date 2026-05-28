@@ -21,17 +21,20 @@ onMounted(async () => {
 })
 
 const quickTags = [
-  { key: 'survival', icon: '🏕️', label: '生存' },
-  { key: 'speedrun', icon: '⚔️', label: '速通' },
-  { key: 'building', icon: '🏗️', label: '建筑' },
-  { key: 'hardcore', icon: '💀', label: '极限' },
+  { key: 'survival', icon: '■', label: '生存向' },
+  { key: 'speedrun', icon: '▲', label: '速通向' },
+  { key: 'building', icon: '◆', label: '建筑向' },
+  { key: 'hardcore', icon: '✛', label: '极限模式' },
 ]
 </script>
 
 <template>
   <div class="home">
     <section class="brand-section">
-      <h1 class="brand-title">S E E D &nbsp; V A U L T</h1>
+      <h1 class="brand-title">
+        <span class="brand-line">SEED</span>
+        <span class="brand-line brand-line--red">VAULT</span>
+      </h1>
       <p class="brand-sub">Minecraft 种子共享平台 · 发现、分享、复制你喜欢的 Minecraft 世界</p>
       <div class="quick-tags">
         <router-link
@@ -79,40 +82,99 @@ const quickTags = [
 </template>
 
 <style scoped>
-.home { max-width: 1152px; margin: 0 auto; }
+.home { max-width: 1280px; margin: 0 auto; }
+
 .brand-section {
-  text-align: center; padding: 48px 24px 40px;
-  border-bottom: 1px solid var(--color-border); margin-bottom: 40px;
+  text-align: center;
+  padding: clamp(80px, 12vh, 120px) 24px clamp(64px, 10vh, 96px);
+  border-bottom: 2px solid var(--border); margin-bottom: 48px;
+  min-height: calc(100vh - 56px - 64px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
+
 .brand-title {
-  font-size: 28px; font-weight: 700; color: var(--color-text-heading);
-  letter-spacing: 0.12em; margin-bottom: 12px;
+  display: flex; flex-direction: column; gap: 0;
+  margin-bottom: 24px;
 }
-.brand-sub { font-size: 16px; color: var(--color-text-secondary); margin-bottom: 24px; }
-.quick-tags { display: flex; justify-content: center; gap: 12px; margin-bottom: 20px; }
+
+.brand-line {
+  font-family: var(--font-macro);
+  font-size: clamp(3.5rem, 9vw, 12rem);
+  font-weight: 900; text-transform: uppercase;
+  letter-spacing: -0.05em; line-height: 0.82;
+  color: var(--ink);
+  display: block;
+}
+
+.brand-line--red { color: var(--red); }
+
+.brand-sub {
+  font-family: var(--font-micro); font-size: 0.75rem;
+  color: var(--ink-dim); letter-spacing: 0.06em;
+  margin-bottom: 32px; max-width: 520px; margin-left: auto; margin-right: auto;
+  line-height: 1.6;
+}
+
+.quick-tags {
+  display: inline-flex; gap: 0; margin-bottom: 24px;
+  border: 1px solid var(--border);
+}
+
 .quick-tag {
-  display: flex; align-items: center; gap: 6px; padding: 8px 20px;
-  background: var(--color-bg-hover); border-radius: 8px; text-decoration: none;
-  font-size: 15px; color: var(--color-text-body); transition: background 150ms;
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 24px; text-decoration: none;
+  font-family: var(--font-micro); font-size: 0.7rem;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--ink);
+  border-right: 1px solid var(--border);
+  transition: background 80ms, color 80ms;
 }
-.quick-tag:hover { background: var(--color-border); }
-.qt-icon { font-size: 18px; }
-.brand-inspire { font-size: 13px; color: var(--color-text-muted); }
-.seed-section { margin-bottom: 48px; }
+.quick-tag:last-child { border-right: none; }
+.quick-tag:hover { background: var(--ink); color: var(--paper); }
+
+.qt-icon { font-size: 0.85rem; }
+
+.brand-inspire {
+  font-family: var(--font-micro); font-size: 0.6rem;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--ink-faint);
+}
+
+.seed-section { margin-bottom: 56px; }
+
 .section-header {
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 20px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
 }
-.section-header h2 { font-size: 20px; font-weight: 600; color: var(--color-text-heading); display: flex; align-items: center; gap: 8px; }
-.section-header a { font-size: 14px; color: var(--color-primary); text-decoration: none; }
+.section-header h2 {
+  font-family: var(--font-micro); font-size: 0.7rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--ink); display: flex; align-items: center; gap: 8px;
+}
+.section-header a {
+  font-family: var(--font-micro); font-size: 0.65rem;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--ink-dim); text-decoration: none;
+}
+.section-header a:hover { color: var(--ink); }
+
 .seed-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(272px, 1fr));
-  gap: 24px;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
 }
+
 @media (max-width: 640px) {
   .seed-grid { grid-template-columns: 1fr; }
   .quick-tags { flex-wrap: wrap; }
 }
-.cta-section { text-align: center; padding: 40px 0; }
-.cta-section p { margin-bottom: 16px; color: var(--color-text-secondary); font-size: 15px; }
+
+.cta-section { text-align: center; padding: 48px 0; }
+.cta-section p {
+  font-family: var(--font-micro); font-size: 0.75rem;
+  color: var(--ink-dim); margin-bottom: 20px;
+}
 </style>

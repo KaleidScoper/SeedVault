@@ -11,11 +11,10 @@ const emit = defineEmits<{ updated: [] }>()
 const message = useMessage()
 const auth = useAuthStore()
 
-const editionColor = computed(() =>
-  props.seed.edition === 'java' ? 'var(--badge-java-text)' : 'var(--badge-bedrock-text)'
-)
-const editionBg = computed(() =>
-  props.seed.edition === 'java' ? 'var(--badge-java-bg)' : 'var(--badge-bedrock-bg)'
+const editionStyle = computed(() =>
+  props.seed.edition === 'java'
+    ? { border: '1px solid var(--border)', background: 'var(--ink)', color: 'var(--paper)' }
+    : { border: '1px solid var(--border)', background: 'var(--paper)', color: 'var(--ink)' }
 )
 
 async function copySeed(e: MouseEvent) {
@@ -71,7 +70,7 @@ function formatCount(n: number): string {
         <div class="card-tags">
           <span
             class="edition-badge"
-            :style="{ color: editionColor, background: editionBg }"
+            :style="editionStyle"
           >
             {{ seed.edition === 'java' ? 'Java' : '基岩' }} · {{ seed.tested_version }}
           </span>
@@ -107,48 +106,76 @@ function formatCount(n: number): string {
 
 <style scoped>
 .seed-card {
-  background: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: 8px;
-  overflow: hidden; transition: box-shadow 150ms;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  overflow: hidden;
 }
-.seed-card:hover { box-shadow: var(--shadow-card); border-color: var(--color-border-hover); }
+.seed-card:hover { background: var(--ink); }
+.seed-card:hover .card-title { color: var(--paper); }
+.seed-card:hover .card-desc { color: var(--paper); }
+.seed-card:hover .meta-item { color: var(--paper); }
+
 .card-link { text-decoration: none; color: inherit; display: block; }
+
 .card-cover {
-  position: relative; aspect-ratio: 16/9; background: var(--color-bg-hover); overflow: hidden;
+  position: relative; aspect-ratio: 16/9;
+  background: var(--ink-faint);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
 }
 .cover-img { width: 100%; height: 100%; object-fit: cover; }
 .cover-placeholder {
   width: 100%; height: 100%; display: flex; align-items: center;
-  justify-content: center; color: var(--color-text-muted); font-size: 14px;
+  justify-content: center; color: var(--ink-dim);
+  font-family: var(--font-micro); font-size: 0.65rem;
+  text-transform: uppercase; letter-spacing: 0.1em;
 }
+
 .copy-btn {
-  position: absolute; top: 8px; right: 8px; opacity: 0;
-  background: var(--color-copy-btn-bg); border: 1px solid var(--color-border);
-  border-radius: 6px; padding: 4px 8px; cursor: pointer;
-  transition: opacity 150ms; display: flex; align-items: center; gap: 4px;
+  position: absolute; top: 8px; right: 8px;
+  background: var(--paper); border: 1px solid var(--border);
+  padding: 3px 8px; cursor: pointer;
+  display: flex; align-items: center; gap: 4px;
+  font-family: var(--font-micro); font-size: 0.6rem;
+  text-transform: uppercase;
 }
-.seed-card:hover .copy-btn { opacity: 1; }
+.seed-card:not(:hover) .copy-btn { display: none; }
+
 .card-body { padding: 12px 16px 16px; }
+
 .card-title {
-  font-size: 16px; font-weight: 500; color: var(--color-text-heading);
+  font-family: var(--font-macro); font-size: 1rem; font-weight: 700;
+  line-height: 1.25; color: var(--ink);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px;
 }
+
 .card-desc {
-  font-size: 13px; color: var(--color-text-muted); line-height: 1.4;
+  font-family: var(--font-micro); font-size: 0.68rem; color: var(--ink-dim);
+  line-height: 1.4;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden; margin-bottom: 10px;
 }
+
 .card-tags {
-  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;
+  display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px;
 }
+
 .edition-badge {
-  font-size: 11px; font-weight: 500; padding: 1px 8px; border-radius: 999px;
+  font-family: var(--font-micro); font-size: 0.6rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 1px 8px;
 }
+
 .tag-chip {
-  font-size: 11px; color: var(--color-text-secondary); background: var(--color-bg-hover);
-  padding: 1px 8px; border-radius: 4px;
+  font-family: var(--font-micro); font-size: 0.6rem; color: var(--ink-dim);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 1px 8px; border: 1px solid var(--border);
 }
+
 .card-meta { display: flex; gap: 12px; align-items: center; }
+
 .meta-item {
-  font-size: 12px; color: var(--color-text-muted); display: flex; align-items: center; gap: 3px;
+  font-family: var(--font-micro); font-size: 0.65rem; color: var(--ink-dim);
+  display: flex; align-items: center; gap: 3px;
 }
 </style>

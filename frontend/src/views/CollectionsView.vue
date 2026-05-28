@@ -116,19 +116,45 @@ async function viewCollection(c: CollectionItem) {
 <style scoped>
 .collections-page { max-width: 900px; margin: 0 auto; }
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-.page-header h1 { font-size: 24px; font-weight: 600; color: var(--color-text-heading); }
-.collection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
-.collection-card {
-  background: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: 8px;
-  overflow: hidden; cursor: pointer; transition: box-shadow 150ms; position: relative;
+.page-header h1 {
+  font-family: var(--font-macro); font-size: 1.8rem; font-weight: 800;
+  text-transform: uppercase; color: var(--ink);
 }
-.collection-card:hover { box-shadow: var(--shadow-card); }
-.cc-cover { height: 120px; background: var(--color-bg-hover); overflow: hidden; }
+.collection-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1px; background: var(--border);
+  border: 1px solid var(--border);
+}
+.collection-card {
+  background: var(--paper); cursor: pointer; position: relative; padding: 16px;
+}
+.collection-card:hover { background: var(--ink); }
+.collection-card:hover h3 { color: var(--paper); }
+.collection-card:hover .cc-desc { color: var(--paper); }
+.collection-card:hover .cc-meta { color: var(--paper); }
+.cc-cover { height: 100px; background: var(--ink-faint); overflow: hidden; margin-bottom: 12px; border: 1px solid var(--border); }
 .cc-cover img { width: 100%; height: 100%; object-fit: cover; }
-.cc-cover-placeholder { height: 100%; display: flex; align-items: center; justify-content: center; color: var(--color-text-muted); }
-.cc-body { padding: 12px 16px; }
-.cc-body h3 { font-size: 15px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 4px; }
-.cc-desc { font-size: 13px; color: var(--color-text-muted); margin-bottom: 8px; }
-.cc-meta { font-size: 12px; color: var(--color-text-muted); display: flex; gap: 12px; }
-.detail-seeds { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.cc-cover-placeholder {
+  height: 100%; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-micro); font-size: 0.6rem;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--ink-dim);
+}
+.cc-body h3 {
+  font-family: var(--font-macro); font-size: 0.95rem; font-weight: 700;
+  color: var(--ink); margin-bottom: 4px;
+}
+.cc-desc {
+  font-family: var(--font-micro); font-size: 0.68rem;
+  color: var(--ink-dim); margin-bottom: 8px;
+}
+.cc-meta {
+  font-family: var(--font-micro); font-size: 0.65rem;
+  color: var(--ink-dim); display: flex; gap: 12px;
+}
+.detail-seeds {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
 </style>

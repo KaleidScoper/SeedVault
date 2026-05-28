@@ -27,11 +27,10 @@ onMounted(async () => {
   }
 })
 
-const editionColor = computed(() =>
-  seed.value?.edition === 'java' ? 'var(--badge-java-text)' : 'var(--badge-bedrock-text)'
-)
-const editionBg = computed(() =>
-  seed.value?.edition === 'java' ? 'var(--badge-java-bg)' : 'var(--badge-bedrock-bg)'
+const editionStyle = computed(() =>
+  seed.value?.edition === 'java'
+    ? { border: '1px solid var(--border)', background: 'var(--ink)', color: 'var(--paper)' }
+    : { border: '1px solid var(--border)', background: 'var(--paper)', color: 'var(--ink)' }
 )
 
 async function copySeed() {
@@ -114,7 +113,7 @@ async function toggleLike() {
             <span class="ir-label">版本端</span>
             <span
               class="edition-badge"
-              :style="{ color: editionColor, background: editionBg }"
+              :style="editionStyle"
             >
               {{ seed.edition === 'java' ? 'Java' : '基岩' }} · {{ seed.tested_version }}
             </span>
@@ -159,7 +158,7 @@ async function toggleLike() {
           <div>
             <div class="uploader-name">
               {{ seed.uploader.minecraft_username || seed.uploader.display_name }}
-              <n-tag v-if="seed.uploader.owns_java_edition" size="tiny" type="success">🎮 正版玩家</n-tag>
+              <n-tag v-if="seed.uploader.owns_java_edition" size="tiny" type="success">&#x25C9; 正版玩家</n-tag>
             </div>
             <div class="uploader-date">{{ seed.created_at.slice(0, 10) }}</div>
           </div>
@@ -178,7 +177,7 @@ async function toggleLike() {
               </n-button>
             </template>
             <div style="padding:12px;width:240px">
-              <p style="margin-bottom:12px;font-size:13px;color:var(--color-text-secondary)">举报该种子</p>
+              <p style="margin-bottom:12px;font-size:13px;color:var(--ink-dim)">举报该种子</p>
               <n-button size="small" type="error" @click="message.success('举报已提交')">确认举报</n-button>
             </div>
           </n-popover>
@@ -197,38 +196,108 @@ async function toggleLike() {
 </template>
 
 <style scoped>
-.detail { display: flex; gap: 32px; }
-.detail-main { flex: 1; min-width: 0; }
-.screenshot-area { margin-bottom: 24px; border-radius: 8px; overflow: hidden; }
-.carousel-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; cursor: pointer; }
-.no-screenshot { background: var(--color-bg-hover); aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; color: var(--color-text-muted); }
-.seed-title { font-size: 24px; font-weight: 600; color: var(--color-text-heading); margin-bottom: 16px; }
-.seed-desc { font-size: 15px; line-height: 1.7; color: var(--color-text-body); }
-.coords-section { margin-top: 24px; }
-.coords-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 12px; color: var(--color-text-label); }
-.coord-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--color-bg-hover); font-size: 14px; }
-.coord-label { font-weight: 500; min-width: 100px; }
-.coord-row code { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--color-text-label); }
-.detail-sidebar { width: 340px; flex-shrink: 0; position: sticky; top: 80px; align-self: flex-start; }
-.info-card { background: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: 8px; padding: 24px; }
-.seed-value-block { text-align: center; }
-.sv-label { font-size: 12px; color: var(--color-text-muted); text-transform: uppercase; margin-bottom: 8px; }
-.sv-value {
-  font-family: "JetBrains Mono", monospace; font-size: 24px; font-weight: 500;
-  color: var(--color-text-heading); letter-spacing: 0.02em; display: block; margin-bottom: 16px;
+.detail {
+  display: grid; grid-template-columns: 1fr 360px;
+  gap: 1px; background: var(--border);
+  border: 1px solid var(--border);
 }
-.info-rows { display: flex; flex-direction: column; gap: 10px; }
-.info-row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
-.ir-label { color: var(--color-text-muted); }
-.edition-badge { font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; }
-.tag-group { display: flex; flex-wrap: wrap; }
-.uploader-info { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.uploader-avatar { width: 40px; height: 40px; border-radius: 4px; }
-.uploader-name { font-size: 14px; font-weight: 500; }
-.uploader-date { font-size: 12px; color: var(--color-text-muted); }
-.action-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.detail-main {
+  background: var(--paper); padding: 24px; min-width: 0;
+}
+.screenshot-area {
+  margin-bottom: 24px; border: 1px solid var(--border); overflow: hidden;
+}
+.carousel-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; cursor: pointer; display: block; }
+.no-screenshot {
+  background: var(--ink-faint); aspect-ratio: 16/9;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-micro); font-size: 0.65rem;
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-dim);
+}
+.seed-title {
+  font-family: var(--font-macro); font-size: 1.6rem; font-weight: 800;
+  color: var(--ink); margin-bottom: 16px;
+}
+.seed-desc {
+  font-family: var(--font-micro); font-size: 0.8rem; line-height: 1.7;
+  color: var(--ink);
+}
+.coords-section { margin-top: 24px; }
+.coords-section h3 {
+  font-family: var(--font-micro); font-size: 0.65rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--ink-dim); margin-bottom: 12px;
+}
+.coord-row {
+  display: flex; align-items: center; gap: 10px; padding: 8px 0;
+  border-bottom: 1px solid var(--ink-faint);
+  font-family: var(--font-micro); font-size: 0.75rem;
+}
+.coord-label { font-weight: 500; min-width: 100px; }
+.coord-row code {
+  font-family: var(--font-micro); font-size: 0.75rem; color: var(--ink);
+}
+
+.detail-sidebar {
+  background: var(--paper); padding: 24px;
+  position: sticky; top: 80px; align-self: flex-start;
+  max-height: calc(100vh - 100px); overflow-y: auto;
+}
+.info-card { padding: 0; }
+
+.seed-value-block {
+  text-align: center; padding: 20px;
+  border: 1px solid var(--border); margin-bottom: 24px;
+}
+.sv-label {
+  font-family: var(--font-micro); font-size: 0.6rem;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--ink-dim); margin-bottom: 8px;
+}
+.sv-value {
+  font-family: var(--font-micro); font-size: 1.4rem; font-weight: 700;
+  letter-spacing: 0.04em; color: var(--ink);
+  display: block; margin-bottom: 16px; word-break: break-all;
+}
+
+.info-rows { display: flex; flex-direction: column; }
+.info-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--ink-faint);
+  font-family: var(--font-micro); font-size: 0.75rem;
+}
+.info-row:last-child { border-bottom: none; }
+.ir-label {
+  font-family: var(--font-micro); font-size: 0.65rem;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--ink-dim);
+}
+.edition-badge {
+  font-family: var(--font-micro); font-size: 0.65rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 1px 10px;
+}
+.tag-group { display: flex; flex-wrap: wrap; margin: 16px 0; }
+.uploader-info {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+  padding-top: 12px; border-top: 1px solid var(--border);
+}
+.uploader-avatar { width: 36px; height: 36px; }
+.uploader-name {
+  font-family: var(--font-micro); font-size: 0.75rem; font-weight: 500;
+}
+.uploader-date {
+  font-family: var(--font-micro); font-size: 0.65rem;
+  color: var(--ink-dim);
+}
+.action-buttons {
+  display: flex; flex-direction: column; gap: 8px;
+  margin-top: 20px; padding-top: 20px;
+  border-top: 2px solid var(--border);
+}
+
 @media (max-width: 768px) {
-  .detail { flex-direction: column; }
-  .detail-sidebar { width: 100%; position: static; }
+  .detail { grid-template-columns: 1fr; }
+  .detail-sidebar { position: static; max-height: none; }
 }
 </style>
