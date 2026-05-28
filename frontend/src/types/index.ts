@@ -116,6 +116,13 @@ export interface Version {
   sort_order: number
 }
 
+export interface Comment {
+  id: number
+  content: string
+  author: UserBrief | null
+  created_at: string
+}
+
 export interface Notification {
   id: number
   type: string

@@ -79,13 +79,18 @@ function formatCount(n: number): string {
             :key="tag.key"
             class="tag-chip"
           >
-            {{ tag.icon }} {{ tag.label }}
+            {{ tag.category === 'gameplay' ? tag.icon + ' ' : '' }}{{ tag.label }}
           </span>
         </div>
         <div class="card-meta">
-          <span v-if="seed.uploader" class="meta-item">
+          <router-link
+            v-if="seed.uploader"
+            :to="`/user/${seed.uploader.id}`"
+            class="meta-item uploader-link"
+            @click.stop
+          >
             {{ seed.uploader.minecraft_username || seed.uploader.display_name }}
-          </span>
+          </router-link>
           <span class="meta-item">
             <n-icon size="14" :component="Heart" />
             {{ formatCount(seed.like_count) }}
@@ -178,4 +183,10 @@ function formatCount(n: number): string {
   font-family: var(--font-micro); font-size: 0.65rem; color: var(--ink-dim);
   display: flex; align-items: center; gap: 3px;
 }
+.uploader-link {
+  text-decoration: none; color: var(--ink-dim);
+  transition: color 80ms;
+}
+.uploader-link:hover { color: var(--ink); text-decoration: underline; }
+.seed-card:hover .uploader-link { color: var(--paper); }
 </style>

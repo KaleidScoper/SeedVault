@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, update
 
 from app.database import get_db
-from app.models import Seed, User, Version, Notification
+from app.models import Seed, User, Version, Notification, Report
 from app.schemas import VersionCreate
 from app.routers.auth import require_admin
 
@@ -229,3 +229,82 @@ async def delete_version(
     await db.delete(version)
     await db.commit()
     return {"data": {"message": "版本号已删除"}}
+
+
+@router.get("/reports")
+async def list_reports(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(24, le=48),
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    count_q = select(func.count()).where(Report.status == "pending")
+    total = (await db.execute(count_q)).scalar() or 0
+
+    q = (
+        select(Report)
+        .where(Report.status == "pending")
+        .order_by(Report.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
+    result = await db.execute(q)
+    reports = result.scalars().all()
+
+    items = []
+    for r in reports:
+        seed_result = await db.execute(select(Seed).where(Seed.id == r.seed_id))
+        seed = seed_result.scalar_one_or_none()
+        reporter = None
+        if r.reporter_id:
+            ur = await db.execute(select(User).where(User.id == r.reporter_id))
+            u = ur.scalar_one_or_none()
+            if u:
+                reporter = {"id": u.id, "display_name": u.display_name}
+        items.append({
+            "id": r.id,
+            "seed_id": r.seed_id,
+            "seed_title": seed.title if seed else "(已删除)",
+            "reporter": reporter,
+            "reason": r.reason,
+            "detail": r.detail,
+            "status": r.status,
+            "created_at": r.created_at.isoformat() + "Z" if r.created_at else None,
+        })
+
+    pages = max(1, (total + page_size - 1) // page_size)
+    return {
+        "data": items,
+        "meta": {"page": page, "page_size": page_size, "total": total, "pages": pages},
+    }
+
+
+@router.post("/reports/{report_id}/review")
+async def review_report(
+    report_id: int,
+    action: str = Query(..., pattern="^(dismiss|remove_seed)$"),
+    db: AsyncSession = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    rq = await db.execute(select(Report).where(Report.id == report_id))
+    report = rq.scalar_one_or_none()
+    if not report:
+        raise HTTPException(status_code=404, detail={"code": "NOT_FOUND", "message": "举报不存在"})
+
+    report.status = "reviewed" if action == "dismiss" else "reviewed"
+
+    if action == "remove_seed":
+        sq = await db.execute(select(Seed).where(Seed.id == report.seed_id))
+        seed = sq.scalar_one_or_none()
+        if seed:
+            seed.status = "rejected"
+            seed.rejection_reason = "因举报被移除"
+            db.add(Notification(
+                user_id=seed.uploader_id,
+                type="seed_rejected",
+                message=f"您的投稿「{seed.title}」因举报被移除",
+                seed_id=seed.id,
+            ))
+
+    await db.commit()
+    return {"data": {"id": report.id, "status": report.status, "message": "已处理"}}

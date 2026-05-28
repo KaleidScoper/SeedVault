@@ -24,7 +24,8 @@ const quickTags = [
   { key: 'survival', icon: '■', label: '生存向' },
   { key: 'speedrun', icon: '▲', label: '速通向' },
   { key: 'building', icon: '◆', label: '建筑向' },
-  { key: 'hardcore', icon: '✛', label: '极限模式' },
+  { key: 'hardcore', icon: '♥', label: '极限模式' },
+  { key: 'challenge', icon: '●', label: '挑战向' },
 ]
 </script>
 

@@ -3,12 +3,12 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   NButton, NIcon, NCarousel, NTag, NDivider, NModal, NImage,
-  NPopover, useMessage,
+  NPopover, NInput, useMessage,
 } from 'naive-ui'
-import { Copy, Heart, Flag, FolderOpen, CheckmarkCircle } from '@vicons/ionicons5'
+import { Copy, Heart, Flag, FolderOpen, CheckmarkCircle, Trash, Send } from '@vicons/ionicons5'
 import api from '@/api'
 import { useAuthStore } from '@/stores/auth'
-import type { SeedDetail } from '@/types'
+import type { SeedDetail, Comment } from '@/types'
 
 const route = useRoute()
 const message = useMessage()
@@ -18,6 +18,11 @@ const loading = ref(true)
 const showLightbox = ref(false)
 const lightboxIndex = ref(0)
 
+const comments = ref<Comment[]>([])
+const commentText = ref('')
+const commentSubmitting = ref(false)
+const commentsTotal = ref(0)
+
 onMounted(async () => {
   try {
     const { data } = await api.get(`/seeds/${route.params.id}`)
@@ -25,7 +30,41 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+  fetchComments()
 })
+
+async function fetchComments() {
+  try {
+    const { data } = await api.get(`/seeds/${route.params.id}/comments`)
+    comments.value = data.data
+    commentsTotal.value = data.meta?.total ?? 0
+  } catch { /* ignore */ }
+}
+
+async function postComment() {
+  if (!commentText.value.trim()) return
+  commentSubmitting.value = true
+  try {
+    await api.post(`/seeds/${route.params.id}/comments`, { content: commentText.value.trim() })
+    commentText.value = ''
+    message.success('评论已发表')
+    await fetchComments()
+  } catch {
+    message.error('评论失败')
+  } finally {
+    commentSubmitting.value = false
+  }
+}
+
+async function deleteComment(commentId: number) {
+  try {
+    await api.delete(`/seeds/${route.params.id}/comments/${commentId}`)
+    message.success('评论已删除')
+    await fetchComments()
+  } catch {
+    message.error('删除失败')
+  }
+}
 
 const editionStyle = computed(() =>
   seed.value?.edition === 'java'
@@ -93,6 +132,66 @@ async function toggleLike() {
           </n-button>
         </div>
       </div>
+
+      <n-divider />
+
+      <div class="comments-section">
+        <h3>评论 ({{ commentsTotal }})</h3>
+
+        <div v-if="auth.isLoggedIn" class="comment-form">
+          <n-input
+            v-model:value="commentText"
+            type="textarea"
+            placeholder="写下你的评论..."
+            :rows="3"
+            maxlength="1000"
+            show-count
+          />
+          <n-button
+            type="primary"
+            size="small"
+            :loading="commentSubmitting"
+            :disabled="!commentText.trim()"
+            @click="postComment"
+            style="margin-top:8px"
+          >
+            <template #icon><n-icon :component="Send" /></template>
+            发表评论
+          </n-button>
+        </div>
+        <p v-else class="comment-login-hint">
+          <router-link to="/login">登录</router-link> 后可以发表评论
+        </p>
+
+        <div v-if="comments.length > 0" class="comment-list">
+          <div v-for="c in comments" :key="c.id" class="comment-item">
+            <img
+              v-if="c.author?.avatar_url"
+              :src="c.author.avatar_url"
+              class="comment-avatar"
+            />
+            <div v-else class="comment-avatar-placeholder">{{ c.author?.display_name?.[0] || '?' }}</div>
+            <div class="comment-body">
+              <div class="comment-header">
+                <span class="comment-author">{{ c.author?.minecraft_username || c.author?.display_name || '匿名' }}</span>
+                <span class="comment-time">{{ new Date(c.created_at).toLocaleDateString('zh-CN') }}</span>
+              </div>
+              <p class="comment-content">{{ c.content }}</p>
+            </div>
+            <n-button
+              v-if="auth.user && (auth.user.id === c.author?.id || auth.isAdmin)"
+              text
+              size="tiny"
+              type="error"
+              @click="deleteComment(c.id)"
+              class="comment-delete"
+            >
+              <template #icon><n-icon :component="Trash" /></template>
+            </n-button>
+          </div>
+        </div>
+        <p v-else class="comment-empty">暂无评论</p>
+      </div>
     </div>
 
     <aside class="detail-sidebar">
@@ -143,21 +242,25 @@ async function toggleLike() {
 
         <div class="tag-group">
           <n-tag v-for="t in seed.tags" :key="t.key" size="small" style="margin:0 6px 6px 0">
-            {{ t.icon }} {{ t.label }}
+            {{ t.category === 'gameplay' ? t.icon + ' ' : '' }}{{ t.label }}
           </n-tag>
         </div>
 
         <n-divider />
 
         <div v-if="seed.uploader" class="uploader-info">
-          <img
-            v-if="seed.uploader.avatar_url"
-            :src="seed.uploader.avatar_url"
-            class="uploader-avatar"
-          />
+          <router-link :to="`/user/${seed.uploader.id}`" class="uploader-avatar-link">
+            <img
+              v-if="seed.uploader.avatar_url"
+              :src="seed.uploader.avatar_url"
+              class="uploader-avatar"
+            />
+          </router-link>
           <div>
             <div class="uploader-name">
-              {{ seed.uploader.minecraft_username || seed.uploader.display_name }}
+              <router-link :to="`/user/${seed.uploader.id}`" class="uploader-name-link">
+                {{ seed.uploader.minecraft_username || seed.uploader.display_name }}
+              </router-link>
               <n-tag v-if="seed.uploader.owns_java_edition" size="tiny" type="success">&#x25C9; 正版玩家</n-tag>
             </div>
             <div class="uploader-date">{{ seed.created_at.slice(0, 10) }}</div>
@@ -282,7 +385,13 @@ async function toggleLike() {
   display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
   padding-top: 12px; border-top: 1px solid var(--border);
 }
+.uploader-avatar-link { flex-shrink: 0; }
 .uploader-avatar { width: 36px; height: 36px; }
+.uploader-avatar-link img { display: block; }
+.uploader-name-link {
+  color: var(--ink); text-decoration: none;
+}
+.uploader-name-link:hover { text-decoration: underline; }
 .uploader-name {
   font-family: var(--font-micro); font-size: 0.75rem; font-weight: 500;
 }
@@ -299,5 +408,63 @@ async function toggleLike() {
 @media (max-width: 768px) {
   .detail { grid-template-columns: 1fr; }
   .detail-sidebar { position: static; max-height: none; }
+}
+
+.comments-section { margin-top: 8px; }
+.comments-section h3 {
+  font-family: var(--font-micro); font-size: 0.65rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--ink-dim); margin-bottom: 16px;
+}
+
+.comment-form { margin-bottom: 20px; }
+
+.comment-login-hint {
+  font-family: var(--font-micro); font-size: 0.7rem; color: var(--ink-dim);
+  margin-bottom: 20px;
+}
+.comment-login-hint a { color: var(--ink); text-decoration: underline; }
+
+.comment-list { display: flex; flex-direction: column; gap: 0; }
+
+.comment-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px 0; border-bottom: 1px solid var(--ink-faint);
+  position: relative;
+}
+.comment-item:first-child { padding-top: 0; }
+
+.comment-avatar {
+  width: 32px; height: 32px; flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+.comment-avatar-placeholder {
+  width: 32px; height: 32px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--ink-faint); border: 1px solid var(--border);
+  font-family: var(--font-micro); font-size: 0.75rem; color: var(--ink-dim);
+}
+
+.comment-body { flex: 1; min-width: 0; }
+.comment-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
+}
+.comment-author {
+  font-family: var(--font-micro); font-size: 0.7rem; font-weight: 500;
+}
+.comment-time {
+  font-family: var(--font-micro); font-size: 0.6rem; color: var(--ink-dim);
+}
+.comment-content {
+  font-family: var(--font-micro); font-size: 0.75rem; line-height: 1.55;
+  color: var(--ink); white-space: pre-wrap; word-break: break-word;
+}
+
+.comment-delete { opacity: 0; flex-shrink: 0; margin-top: 2px; }
+.comment-item:hover .comment-delete { opacity: 1; }
+
+.comment-empty {
+  font-family: var(--font-micro); font-size: 0.7rem; color: var(--ink-dim);
+  text-align: center; padding: 20px 0;
 }
 </style>

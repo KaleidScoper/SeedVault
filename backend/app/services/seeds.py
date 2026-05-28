@@ -32,6 +32,7 @@ async def list_seeds(
     mod_env: Optional[str] = None,
     sort: str = "popular",
     q: Optional[str] = None,
+    uploader_id: Optional[int] = None,
     page: int = 1,
     page_size: int = 24,
     current_user_id: Optional[int] = None,
@@ -39,6 +40,8 @@ async def list_seeds(
     # Base query
     conditions = [Seed.status == "approved"]
 
+    if uploader_id:
+        conditions.append(Seed.uploader_id == uploader_id)
     if edition:
         conditions.append(Seed.edition == edition)
     if version:

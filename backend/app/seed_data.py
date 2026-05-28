@@ -55,8 +55,8 @@ async def seed_all(db: AsyncSession):
         ("survival", "生存向", "■", "gameplay"),
         ("speedrun", "速通向", "▲", "gameplay"),
         ("building", "建筑向", "◆", "gameplay"),
-        ("hardcore", "极限模式", "✛", "gameplay"),
-        ("challenge", "挑战向", "◎", "gameplay"),
+        ("hardcore", "极限模式", "♥", "gameplay"),
+        ("challenge", "挑战向", "●", "gameplay"),
         # feature
         ("spawn_wonder", "出生点奇观", "△", "feature"),
         ("rare_biome", "稀有群系", "◇", "feature"),
