@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NIcon, NSelect, NEmpty, NPagination } from 'naive-ui'
+import { NButton, NIcon, NSelect, NEmpty, NPagination, NTooltip } from 'naive-ui'
 import { Dice } from '@vicons/ionicons5'
 import api from '@/api'
 import { useMetaStore } from '@/stores/meta'
+import { GAMEPLAY_TAG_DESCRIPTIONS } from '@/constants/tags'
 import type { SeedListItem, Version } from '@/types'
 import SeedCard from '@/components/SeedCard.vue'
 
@@ -134,13 +135,17 @@ function randomSeed() {
       <div class="filter-group">
         <label>玩法标签</label>
         <div class="chip-group">
-          <button
-            v-for="t in gameplayTags" :key="t.key"
-            :class="['chip', { active: tagFilter === t.key }]"
-            @click="tagFilter = tagFilter === t.key ? null : t.key"
-          >
-            {{ t.icon }} {{ t.label }}
-          </button>
+          <n-tooltip v-for="t in gameplayTags" :key="t.key" trigger="hover">
+            <template #trigger>
+              <button
+                :class="['chip', { active: tagFilter === t.key }]"
+                @click="tagFilter = tagFilter === t.key ? null : t.key"
+              >
+                {{ t.icon }} {{ t.label }}
+              </button>
+            </template>
+            {{ GAMEPLAY_TAG_DESCRIPTIONS[t.key] }}
+          </n-tooltip>
         </div>
       </div>
       <div class="filter-group">
@@ -200,23 +205,23 @@ function randomSeed() {
 }
 .filter-group { margin-bottom: 20px; }
 .filter-group label {
-  display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px;
+  display: block; font-size: 13px; font-weight: 500; color: var(--color-text-label); margin-bottom: 6px;
 }
 .chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip {
-  padding: 3px 10px; border: 1px solid #e4e7eb; border-radius: 4px;
-  background: #fff; font-size: 12px; color: #6b7280; cursor: pointer;
+  padding: 3px 10px; border: 1px solid var(--color-border); border-radius: 4px;
+  background: var(--color-bg-surface); font-size: 12px; color: var(--color-text-secondary); cursor: pointer;
   transition: all 150ms;
 }
-.chip:hover { border-color: #cbd0d6; }
-.chip.active { background: #eff6ff; border-color: #3b82f6; color: #1d4ed8; }
+.chip:hover { border-color: var(--color-border-hover); }
+.chip.active { background: var(--color-primary-light); border-color: var(--color-border-active); color: var(--color-primary-dark); }
 .content { flex: 1; min-width: 0; }
 .top-bar {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 20px;
 }
 .sort-area { display: flex; gap: 8px; align-items: center; }
-.result-count { font-size: 13px; color: #9ca3af; }
+.result-count { font-size: 13px; color: var(--color-text-muted); }
 .seed-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(256px, 1fr));

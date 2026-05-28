@@ -101,13 +101,13 @@ async function doReject() {
 <style scoped>
 .admin-page { max-width: 800px; margin: 0 auto; }
 .page-header { margin-bottom: 24px; }
-.page-header h1 { font-size: 24px; font-weight: 600; color: #1f2937; display: flex; align-items: center; gap: 8px; }
+.page-header h1 { font-size: 24px; font-weight: 600; color: var(--color-text-heading); display: flex; align-items: center; gap: 8px; }
 .pending-list { display: flex; flex-direction: column; gap: 12px; }
 .pending-row {
-  background: #fff; border: 1px solid #e4e7eb; border-radius: 8px;
+  background: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: 8px;
   padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
 }
-.row-info h3 { font-size: 16px; font-weight: 500; margin-bottom: 6px; color: #1f2937; }
-.row-meta { display: flex; gap: 16px; font-size: 12px; color: #9ca3af; align-items: center; }
+.row-info h3 { font-size: 16px; font-weight: 500; margin-bottom: 6px; color: var(--color-text-heading); }
+.row-meta { display: flex; gap: 16px; font-size: 12px; color: var(--color-text-muted); align-items: center; }
 .row-actions { display: flex; gap: 8px; }
 </style>

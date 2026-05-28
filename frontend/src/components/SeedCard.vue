@@ -12,10 +12,10 @@ const message = useMessage()
 const auth = useAuthStore()
 
 const editionColor = computed(() =>
-  props.seed.edition === 'java' ? '#22c55e' : '#d97706'
+  props.seed.edition === 'java' ? 'var(--badge-java-text)' : 'var(--badge-bedrock-text)'
 )
 const editionBg = computed(() =>
-  props.seed.edition === 'java' ? '#f0fdf4' : '#fffbeb'
+  props.seed.edition === 'java' ? 'var(--badge-java-bg)' : 'var(--badge-bedrock-bg)'
 )
 
 async function copySeed(e: MouseEvent) {
@@ -107,33 +107,33 @@ function formatCount(n: number): string {
 
 <style scoped>
 .seed-card {
-  background: #fff; border: 1px solid #e4e7eb; border-radius: 8px;
+  background: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: 8px;
   overflow: hidden; transition: box-shadow 150ms;
 }
-.seed-card:hover { box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-color: #cbd0d6; }
+.seed-card:hover { box-shadow: var(--shadow-card); border-color: var(--color-border-hover); }
 .card-link { text-decoration: none; color: inherit; display: block; }
 .card-cover {
-  position: relative; aspect-ratio: 16/9; background: #f0f2f5; overflow: hidden;
+  position: relative; aspect-ratio: 16/9; background: var(--color-bg-hover); overflow: hidden;
 }
 .cover-img { width: 100%; height: 100%; object-fit: cover; }
 .cover-placeholder {
   width: 100%; height: 100%; display: flex; align-items: center;
-  justify-content: center; color: #9ca3af; font-size: 14px;
+  justify-content: center; color: var(--color-text-muted); font-size: 14px;
 }
 .copy-btn {
   position: absolute; top: 8px; right: 8px; opacity: 0;
-  background: rgba(255,255,255,0.9); border: 1px solid #e4e7eb;
+  background: var(--color-copy-btn-bg); border: 1px solid var(--color-border);
   border-radius: 6px; padding: 4px 8px; cursor: pointer;
   transition: opacity 150ms; display: flex; align-items: center; gap: 4px;
 }
 .seed-card:hover .copy-btn { opacity: 1; }
 .card-body { padding: 12px 16px 16px; }
 .card-title {
-  font-size: 16px; font-weight: 500; color: #1f2937;
+  font-size: 16px; font-weight: 500; color: var(--color-text-heading);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px;
 }
 .card-desc {
-  font-size: 13px; color: #9ca3af; line-height: 1.4;
+  font-size: 13px; color: var(--color-text-muted); line-height: 1.4;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden; margin-bottom: 10px;
 }
@@ -144,11 +144,11 @@ function formatCount(n: number): string {
   font-size: 11px; font-weight: 500; padding: 1px 8px; border-radius: 999px;
 }
 .tag-chip {
-  font-size: 11px; color: #6b7280; background: #f0f2f5;
+  font-size: 11px; color: var(--color-text-secondary); background: var(--color-bg-hover);
   padding: 1px 8px; border-radius: 4px;
 }
 .card-meta { display: flex; gap: 12px; align-items: center; }
 .meta-item {
-  font-size: 12px; color: #9ca3af; display: flex; align-items: center; gap: 3px;
+  font-size: 12px; color: var(--color-text-muted); display: flex; align-items: center; gap: 3px;
 }
 </style>

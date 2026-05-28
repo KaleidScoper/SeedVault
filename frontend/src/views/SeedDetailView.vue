@@ -28,10 +28,10 @@ onMounted(async () => {
 })
 
 const editionColor = computed(() =>
-  seed.value?.edition === 'java' ? '#22c55e' : '#d97706'
+  seed.value?.edition === 'java' ? 'var(--badge-java-text)' : 'var(--badge-bedrock-text)'
 )
 const editionBg = computed(() =>
-  seed.value?.edition === 'java' ? '#f0fdf4' : '#fffbeb'
+  seed.value?.edition === 'java' ? 'var(--badge-java-bg)' : 'var(--badge-bedrock-bg)'
 )
 
 async function copySeed() {
@@ -178,7 +178,7 @@ async function toggleLike() {
               </n-button>
             </template>
             <div style="padding:12px;width:240px">
-              <p style="margin-bottom:12px;font-size:13px;color:#6b7280">举报该种子</p>
+              <p style="margin-bottom:12px;font-size:13px;color:var(--color-text-secondary)">举报该种子</p>
               <n-button size="small" type="error" @click="message.success('举报已提交')">确认举报</n-button>
             </div>
           </n-popover>
@@ -201,31 +201,31 @@ async function toggleLike() {
 .detail-main { flex: 1; min-width: 0; }
 .screenshot-area { margin-bottom: 24px; border-radius: 8px; overflow: hidden; }
 .carousel-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; cursor: pointer; }
-.no-screenshot { background: #f0f2f5; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; color: #9ca3af; }
-.seed-title { font-size: 24px; font-weight: 600; color: #1f2937; margin-bottom: 16px; }
-.seed-desc { font-size: 15px; line-height: 1.7; color: #4b5563; }
+.no-screenshot { background: var(--color-bg-hover); aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; color: var(--color-text-muted); }
+.seed-title { font-size: 24px; font-weight: 600; color: var(--color-text-heading); margin-bottom: 16px; }
+.seed-desc { font-size: 15px; line-height: 1.7; color: var(--color-text-body); }
 .coords-section { margin-top: 24px; }
-.coords-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 12px; color: #374151; }
-.coord-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 14px; }
+.coords-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 12px; color: var(--color-text-label); }
+.coord-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--color-bg-hover); font-size: 14px; }
 .coord-label { font-weight: 500; min-width: 100px; }
-.coord-row code { font-family: "JetBrains Mono", monospace; font-size: 13px; color: #374151; }
+.coord-row code { font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--color-text-label); }
 .detail-sidebar { width: 340px; flex-shrink: 0; position: sticky; top: 80px; align-self: flex-start; }
-.info-card { background: #fff; border: 1px solid #e4e7eb; border-radius: 8px; padding: 24px; }
+.info-card { background: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: 8px; padding: 24px; }
 .seed-value-block { text-align: center; }
-.sv-label { font-size: 12px; color: #9ca3af; text-transform: uppercase; margin-bottom: 8px; }
+.sv-label { font-size: 12px; color: var(--color-text-muted); text-transform: uppercase; margin-bottom: 8px; }
 .sv-value {
   font-family: "JetBrains Mono", monospace; font-size: 24px; font-weight: 500;
-  color: #1f2937; letter-spacing: 0.02em; display: block; margin-bottom: 16px;
+  color: var(--color-text-heading); letter-spacing: 0.02em; display: block; margin-bottom: 16px;
 }
 .info-rows { display: flex; flex-direction: column; gap: 10px; }
 .info-row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
-.ir-label { color: #9ca3af; }
+.ir-label { color: var(--color-text-muted); }
 .edition-badge { font-size: 12px; font-weight: 500; padding: 1px 10px; border-radius: 999px; }
 .tag-group { display: flex; flex-wrap: wrap; }
 .uploader-info { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 .uploader-avatar { width: 40px; height: 40px; border-radius: 4px; }
 .uploader-name { font-size: 14px; font-weight: 500; }
-.uploader-date { font-size: 12px; color: #9ca3af; }
+.uploader-date { font-size: 12px; color: var(--color-text-muted); }
 .action-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
 @media (max-width: 768px) {
   .detail { flex-direction: column; }

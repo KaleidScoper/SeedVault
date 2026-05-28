@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { NButton, NInput, NSelect, NSteps, NStep, NUpload, NIcon, useMessage } from 'naive-ui'
+import { NButton, NInput, NSelect, NSteps, NStep, NUpload, NIcon, NTooltip, useMessage } from 'naive-ui'
 import { ArrowBack, ArrowForward, Checkmark } from '@vicons/ionicons5'
 import { useMetaStore } from '@/stores/meta'
 import { useAuthStore } from '@/stores/auth'
+import { GAMEPLAY_TAG_DESCRIPTIONS } from '@/constants/tags'
 import api from '@/api'
 
 const router = useRouter()
@@ -212,13 +213,17 @@ async function submit() {
       <div class="form-row">
         <label>玩法标签 <span class="required">*</span>（必选其一）</label>
         <div class="chip-group">
-          <button
-            v-for="t in gameplayTags" :key="t.key"
-            :class="['chip', { active: selectedTags.includes(t.key) }]"
-            @click="selectedTags.includes(t.key) ? selectedTags = selectedTags.filter(k => k !== t.key) : selectedTags.push(t.key)"
-          >
-            {{ t.icon }} {{ t.label }}
-          </button>
+          <n-tooltip v-for="t in gameplayTags" :key="t.key" trigger="hover">
+            <template #trigger>
+              <button
+                :class="['chip', { active: selectedTags.includes(t.key) }]"
+                @click="selectedTags.includes(t.key) ? selectedTags = selectedTags.filter(k => k !== t.key) : selectedTags.push(t.key)"
+              >
+                {{ t.icon }} {{ t.label }}
+              </button>
+            </template>
+            {{ GAMEPLAY_TAG_DESCRIPTIONS[t.key] }}
+          </n-tooltip>
         </div>
       </div>
       <div class="form-row">
@@ -245,19 +250,19 @@ async function submit() {
 
 <style scoped>
 .submit-page { max-width: 640px; margin: 0 auto; }
-h1 { font-size: 24px; font-weight: 600; color: #1f2937; margin-bottom: 8px; }
-.step-content { background: #fff; border: 1px solid #e4e7eb; border-radius: 8px; padding: 32px; }
+h1 { font-size: 24px; font-weight: 600; color: var(--color-text-heading); margin-bottom: 8px; }
+.step-content { background: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: 8px; padding: 32px; }
 .form-row { margin-bottom: 20px; }
-.form-row label { display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px; }
-.required { color: #dc2626; }
-.hint { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+.form-row label { display: block; font-size: 14px; font-weight: 500; color: var(--color-text-label); margin-bottom: 6px; }
+.required { color: var(--color-danger); }
+.hint { font-size: 12px; color: var(--color-text-muted); margin-top: 4px; }
 .coord-inputs { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {
-  padding: 6px 14px; border: 1px solid #e4e7eb; border-radius: 6px;
-  background: #fff; font-size: 14px; cursor: pointer; transition: all 150ms;
+  padding: 6px 14px; border: 1px solid var(--color-border); border-radius: 6px;
+  background: var(--color-bg-surface); font-size: 14px; color: var(--color-text-body); cursor: pointer; transition: all 150ms;
 }
-.chip:hover { border-color: #cbd0d6; }
-.chip.active { background: #eff6ff; border-color: #3b82f6; color: #1d4ed8; }
+.chip:hover { border-color: var(--color-border-hover); }
+.chip.active { background: var(--color-primary-light); border-color: var(--color-border-active); color: var(--color-primary-dark); }
 .step-actions { display: flex; justify-content: space-between; margin-top: 32px; }
 </style>

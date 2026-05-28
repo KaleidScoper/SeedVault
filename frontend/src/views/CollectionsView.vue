@@ -116,19 +116,19 @@ async function viewCollection(c: CollectionItem) {
 <style scoped>
 .collections-page { max-width: 900px; margin: 0 auto; }
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-.page-header h1 { font-size: 24px; font-weight: 600; color: #1f2937; }
+.page-header h1 { font-size: 24px; font-weight: 600; color: var(--color-text-heading); }
 .collection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
 .collection-card {
-  background: #fff; border: 1px solid #e4e7eb; border-radius: 8px;
+  background: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: 8px;
   overflow: hidden; cursor: pointer; transition: box-shadow 150ms; position: relative;
 }
-.collection-card:hover { box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-.cc-cover { height: 120px; background: #f0f2f5; overflow: hidden; }
+.collection-card:hover { box-shadow: var(--shadow-card); }
+.cc-cover { height: 120px; background: var(--color-bg-hover); overflow: hidden; }
 .cc-cover img { width: 100%; height: 100%; object-fit: cover; }
-.cc-cover-placeholder { height: 100%; display: flex; align-items: center; justify-content: center; color: #9ca3af; }
+.cc-cover-placeholder { height: 100%; display: flex; align-items: center; justify-content: center; color: var(--color-text-muted); }
 .cc-body { padding: 12px 16px; }
-.cc-body h3 { font-size: 15px; font-weight: 500; color: #1f2937; margin-bottom: 4px; }
-.cc-desc { font-size: 13px; color: #9ca3af; margin-bottom: 8px; }
-.cc-meta { font-size: 12px; color: #9ca3af; display: flex; gap: 12px; }
+.cc-body h3 { font-size: 15px; font-weight: 500; color: var(--color-text-heading); margin-bottom: 4px; }
+.cc-desc { font-size: 13px; color: var(--color-text-muted); margin-bottom: 8px; }
+.cc-meta { font-size: 12px; color: var(--color-text-muted); display: flex; gap: 12px; }
 .detail-seeds { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
 </style>

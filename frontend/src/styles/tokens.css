@@ -1,0 +1,67 @@
+/* SeedVault design tokens — light + dark via data-theme */
+
+:root {
+  --color-bg-page: #fafbfc;
+  --color-bg-surface: #ffffff;
+  --color-bg-hover: #f0f2f5;
+  --color-bg-nav: rgba(250, 251, 252, 0.92);
+  --color-bg-nav-hover: #eff6ff;
+
+  --color-border: #e4e7eb;
+  --color-border-hover: #cbd0d6;
+  --color-border-active: #3b82f6;
+
+  --color-text-heading: #1f2937;
+  --color-text-body: #4b5563;
+  --color-text-secondary: #6b7280;
+  --color-text-muted: #9ca3af;
+  --color-text-label: #374151;
+
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-primary-light: #eff6ff;
+  --color-primary-dark: #1d4ed8;
+
+  --color-danger: #dc2626;
+
+  --badge-java-text: #22c55e;
+  --badge-java-bg: #f0fdf4;
+  --badge-bedrock-text: #d97706;
+  --badge-bedrock-bg: #fffbeb;
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --color-copy-btn-bg: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="dark"] {
+  --color-bg-page: #111827;
+  --color-bg-surface: #1f2937;
+  --color-bg-hover: #374151;
+  --color-bg-nav: rgba(17, 24, 39, 0.92);
+  --color-bg-nav-hover: #1e3a5f;
+
+  --color-border: #374151;
+  --color-border-hover: #4b5563;
+  --color-border-active: #60a5fa;
+
+  --color-text-heading: #f3f4f6;
+  --color-text-body: #9ca3af;
+  --color-text-secondary: #9ca3af;
+  --color-text-muted: #6b7280;
+  --color-text-label: #d1d5db;
+
+  --color-primary: #60a5fa;
+  --color-primary-hover: #3b82f6;
+  --color-primary-light: #1e3a5f;
+  --color-primary-dark: #93bbfd;
+
+  --color-danger: #ef4444;
+
+  --badge-java-text: #4ade80;
+  --badge-java-bg: #052e16;
+  --badge-bedrock-text: #f59e0b;
+  --badge-bedrock-bg: #451a03;
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.30);
+  --color-copy-btn-bg: rgba(31, 41, 55, 0.9);
+}

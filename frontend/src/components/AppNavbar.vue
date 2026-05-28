@@ -1,15 +1,20 @@
 <script setup lang="ts">
-import { h, ref } from 'vue'
+import { h, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
 import {
   NDropdown, NButton, NAvatar, NBadge, NIcon, NPopover,
 } from 'naive-ui'
 import { Diamond, Search, LogIn, LogOut, Add, FolderOpen, ShieldCheckmark, Heart } from '@vicons/ionicons5'
 import type { Component } from 'vue'
+import ThemeToggle from './ThemeToggle.vue'
 
 const router = useRouter()
 const auth = useAuthStore()
+const theme = useThemeStore()
+
+const logoColor = computed(() => theme.isDark ? '#60a5fa' : '#3b82f6')
 
 const showSearch = ref(false)
 const searchQuery = ref('')
@@ -51,7 +56,7 @@ function handleUserSelect(key: string) {
     <div class="navbar-inner">
       <div class="nav-left">
         <router-link to="/" class="nav-logo">
-          <n-icon size="22" :component="Diamond" color="#3b82f6" />
+          <n-icon size="22" :component="Diamond" :color="logoColor" />
           <span class="logo-text">Seed Vault</span>
         </router-link>
       </div>
@@ -60,6 +65,7 @@ function handleUserSelect(key: string) {
         <router-link to="/submit" class="nav-link">投稿</router-link>
       </div>
       <div class="nav-right">
+        <ThemeToggle />
         <n-popover v-model:show="showSearch" trigger="click" placement="bottom-end">
           <template #trigger>
             <n-button quaternary circle size="medium">
@@ -107,8 +113,8 @@ function handleUserSelect(key: string) {
 <style scoped>
 .navbar {
   position: sticky; top: 0; z-index: 100;
-  background: rgba(250,251,252,0.92); backdrop-filter: blur(8px);
-  border-bottom: 1px solid #e4e7eb;
+  background: var(--color-bg-nav); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--color-border);
 }
 .navbar-inner {
   max-width: 1152px; margin: 0 auto; padding: 0 24px;
@@ -117,19 +123,19 @@ function handleUserSelect(key: string) {
 .nav-left { display: flex; align-items: center; }
 .nav-logo {
   display: flex; align-items: center; gap: 8px; text-decoration: none;
-  font-size: 18px; font-weight: 600; color: #1f2937; letter-spacing: 0.04em;
+  font-size: 18px; font-weight: 600; color: var(--color-text-heading); letter-spacing: 0.04em;
 }
 .nav-center { display: flex; gap: 4px; }
 .nav-link {
   padding: 6px 16px; border-radius: 6px; text-decoration: none;
-  font-size: 15px; color: #4b5563; transition: background 150ms;
+  font-size: 15px; color: var(--color-text-body); transition: background 150ms;
 }
-.nav-link:hover, .nav-link.router-link-active { background: #eff6ff; color: #3b82f6; }
+.nav-link:hover, .nav-link.router-link-active { background: var(--color-bg-nav-hover); color: var(--color-primary); }
 .nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
 .search-popup { display: flex; gap: 8px; padding: 8px; }
 .search-input {
-  border: 1px solid #e4e7eb; border-radius: 6px; padding: 6px 12px;
-  width: 260px; font-size: 14px; outline: none;
+  border: 1px solid var(--color-border); border-radius: 6px; padding: 6px 12px;
+  width: 260px; font-size: 14px; outline: none; background: var(--color-bg-surface); color: var(--color-text-body);
 }
-.search-input:focus { border-color: #3b82f6; }
+.search-input:focus { border-color: var(--color-primary); }
 </style>

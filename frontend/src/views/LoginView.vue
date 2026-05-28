@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { NButton, NDivider, NSelect, NIcon } from 'naive-ui'
-import { LogIn } from '@vicons/ionicons5'
+import { LogoMicrosoft } from '@vicons/ionicons5'
 import { useAuthStore } from '@/stores/auth'
 import api from '@/api'
 
@@ -33,7 +33,7 @@ async function doDevLogin() {
       <p class="subtitle">使用 Microsoft 账号登录，自动创建账户</p>
 
       <n-button block size="large" @click="msLogin" style="height:44px">
-        <template #icon><n-icon :component="LogIn" /></template>
+        <template #icon><n-icon :component="LogoMicrosoft" /></template>
         使用 Microsoft 账号登录
       </n-button>
 
@@ -56,12 +56,12 @@ async function doDevLogin() {
   min-height: 60vh;
 }
 .login-card {
-  width: 400px; background: #fff; border: 1px solid #e4e7eb;
+  width: 400px; background: var(--color-bg-surface); border: 1px solid var(--color-border);
   border-radius: 8px; padding: 40px;
 }
-h1 { font-size: 22px; font-weight: 600; text-align: center; margin-bottom: 8px; color: #1f2937; }
-.subtitle { text-align: center; font-size: 14px; color: #9ca3af; margin-bottom: 32px; }
+h1 { font-size: 22px; font-weight: 600; text-align: center; margin-bottom: 8px; color: var(--color-text-heading); }
+.subtitle { text-align: center; font-size: 14px; color: var(--color-text-muted); margin-bottom: 32px; }
 .dev-section { margin-top: 8px; }
-.dev-label { font-size: 12px; color: #9ca3af; margin-bottom: 8px; text-align: center; }
+.dev-label { font-size: 12px; color: var(--color-text-muted); margin-bottom: 8px; text-align: center; }
 .dev-row { display: flex; gap: 8px; }
 </style>

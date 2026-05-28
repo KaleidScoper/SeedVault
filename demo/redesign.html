@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="print">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEED VAULT — MINECRAFT SEED REGISTRY</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:ital,opsz,wght@0,5..1200,900;1,5..1200,900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   SEED VAULT — SWISS INDUSTRIAL PRINT
+   BRUTALIST DESIGN SYSTEM v1.0
+   ═══════════════════════════════════════════ */
+
+:root {
+  --paper: #F4F4F0;
+  --ink: #0A0A0A;
+  --ink-60: rgba(10,10,10,0.60);
+  --ink-30: rgba(10,10,10,0.30);
+  --ink-10: rgba(10,10,10,0.10);
+  --red: #E61919;
+  --red-dim: #B81515;
+  --grid-gap: 1px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--ink);
+  background: var(--paper);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ── Noise Texture Overlay ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* ═══ TYPOGRAPHY ═══ */
+
+.macro {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.04em;
+  line-height: 0.88;
+}
+
+.micro {
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.data {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+}
+
+.disrupt {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-style: italic;
+}
+
+/* ═══ LAYOUT GRID ═══ */
+
+.container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+.vgrid {
+  display: grid;
+  gap: var(--grid-gap);
+  background: var(--ink);
+  border: 1px solid var(--ink);
+}
+
+.vgrid > * { background: var(--paper); }
+
+/* ═══ NAVIGATION ═══ */
+
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--paper);
+  border-bottom: 2px solid var(--ink);
+}
+
+.nav-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: 1280px; margin: 0 auto; padding: 0 24px; height: 56px;
+}
+
+.nav-brand {
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; user-select: none;
+}
+
+.nav-brand .macro {
+  font-size: 1.1rem;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+
+.nav-brand-symbol {
+  width: 32px; height: 32px;
+  border: 2px solid var(--ink);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.nav-brand-symbol::after {
+  content: '◆';
+  font-size: 14px;
+  color: var(--red);
+}
+
+.nav-links {
+  display: flex; gap: 0;
+  border: 1px solid var(--ink);
+  border-bottom: none;
+}
+
+.nav-link {
+  padding: 8px 20px; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
+  font-size: 0.7rem; letter-spacing: 0.08em;
+  background: var(--paper); color: var(--ink);
+  border: none;
+  border-right: 1px solid var(--ink);
+  transition: background 100ms;
+}
+
+.nav-link:last-child { border-right: none; }
+
+.nav-link:hover { background: var(--ink); color: var(--paper); }
+
+.nav-link.active { background: var(--ink); color: var(--paper); }
+
+.nav-right { display: flex; align-items: center; gap: 12px; }
+
+.btn-icon {
+  width: 36px; height: 36px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  transition: background 100ms, color 100ms;
+}
+
+.btn-icon:hover { background: var(--ink); color: var(--paper); }
+
+/* ═══ BUTTONS ═══ */
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 24px;
+  font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
+  font-size: 0.75rem; letter-spacing: 0.06em;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 100ms, color 100ms;
+}
+
+.btn:hover { background: var(--ink); color: var(--paper); }
+
+.btn--primary { background: var(--ink); color: var(--paper); }
+
+.btn--primary:hover { background: var(--red); border-color: var(--red); color: var(--paper); }
+
+.btn--danger { border-color: var(--red); color: var(--red); }
+
+.btn--danger:hover { background: var(--red); color: var(--paper); }
+
+.btn--sm { padding: 6px 14px; font-size: 0.65rem; }
+
+/* ═══ INPUTS ═══ */
+
+.input {
+  width: 100%; padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem; letter-spacing: 0.04em;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  outline: none;
+}
+
+.input:focus { border-width: 2px; padding: 9px 13px; }
+
+.input::placeholder { color: var(--ink-30); }
+
+textarea.input { resize: vertical; min-height: 100px; }
+
+.select {
+  width: 100%; padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem; letter-spacing: 0.04em;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%230A0A0A'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+/* ═══ CARDS ═══ */
+
+.card {
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  transition: background 100ms;
+}
+
+.card:hover { background: var(--ink-10); }
+
+.card-cover {
+  aspect-ratio: 16/9;
+  background: var(--ink-10);
+  border-bottom: 1px solid var(--ink);
+  overflow: hidden;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.card-cover-placeholder {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem; text-transform: uppercase;
+  color: var(--ink-30); letter-spacing: 0.1em;
+}
+
+.card-body { padding: 14px 16px; }
+
+.card-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700; font-size: 1rem;
+  line-height: 1.25; margin-bottom: 6px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.card-desc {
+  font-size: 0.7rem; color: var(--ink-60);
+  line-height: 1.4; margin-bottom: 10px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+
+/* ═══ TAGS / CHIPS ═══ */
+
+.tag {
+  display: inline-block; padding: 2px 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.06em;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+.tag--java { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+
+.tag--bedrock { border-color: var(--ink); background: var(--paper); color: var(--ink); }
+
+.tag--active { background: var(--ink); color: var(--paper); }
+
+.chip {
+  display: inline-block; padding: 4px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  cursor: pointer;
+  transition: background 100ms, color 100ms;
+}
+
+.chip:hover { background: var(--ink-10); }
+
+.chip--active { background: var(--ink); color: var(--paper); }
+
+.chip--active:hover { background: var(--red); border-color: var(--red); }
+
+/* ═══ SECTION HEADERS ═══ */
+
+.section-hr {
+  border: none; border-top: 2px solid var(--ink);
+  margin: 48px 0 24px;
+}
+
+.section-hr.thin { border-top-width: 1px; }
+
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--ink-60);
+  margin-bottom: 8px;
+}
+
+/* ═══ HERO ═══ */
+
+.hero {
+  padding: 64px 0 56px;
+  text-align: center;
+  border-bottom: 2px solid var(--ink);
+}
+
+.hero-overline {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.16em;
+  color: var(--ink-60);
+  margin-bottom: 20px;
+}
+
+.hero-title {
+  font-size: clamp(3rem, 8vw, 10rem);
+  margin-bottom: 16px;
+}
+
+.hero-title-line { display: block; }
+
+.hero-title-line:last-child { color: var(--red); }
+
+.hero-sub {
+  font-size: 0.8rem; color: var(--ink-60);
+  max-width: 520px; margin: 0 auto 32px;
+  letter-spacing: 0.04em; line-height: 1.6;
+}
+
+.hero-registry {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.14em;
+  padding: 8px 20px;
+  border: 1px solid var(--ink);
+  margin-top: 8px;
+}
+
+/* ═══ QUICK TAGS ═══ */
+
+.quick-tags {
+  display: flex; justify-content: center; gap: 0;
+  margin: 32px 0 0;
+  border: 1px solid var(--ink);
+  display: inline-flex;
+}
+
+.quick-tag {
+  padding: 10px 24px; cursor: pointer;
+  border-right: 1px solid var(--ink);
+  font-size: 0.7rem; letter-spacing: 0.06em;
+  transition: background 100ms, color 100ms;
+}
+
+.quick-tag:last-child { border-right: none; }
+
+.quick-tag:hover { background: var(--ink); color: var(--paper); }
+
+/* ═══ SEED GRID ═══ */
+
+.seed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--grid-gap);
+  background: var(--ink);
+  border: 1px solid var(--ink);
+}
+
+.seed-grid > * { background: var(--paper); }
+
+/* ═══ BROWSE LAYOUT ═══ */
+
+.browse-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: var(--grid-gap);
+  background: var(--ink);
+  border: 1px solid var(--ink);
+}
+
+.browse-layout > * { background: var(--paper); }
+
+/* ═══ FILTER PANEL ═══ */
+
+.filter-panel {
+  padding: 20px;
+  position: sticky; top: 80px; align-self: flex-start;
+  max-height: calc(100vh - 100px); overflow-y: auto;
+}
+
+.filter-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--ink-60);
+  margin-bottom: 6px;
+}
+
+.filter-group { margin-bottom: 20px; }
+
+.chip-group { display: flex; flex-wrap: wrap; gap: 4px; }
+
+/* ═══ DETAIL LAYOUT ═══ */
+
+.detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: var(--grid-gap);
+  background: var(--ink);
+  border: 1px solid var(--ink);
+}
+
+.detail-layout > * { background: var(--paper); }
+
+.detail-main { padding: 24px; }
+
+.detail-aside {
+  padding: 24px;
+  position: sticky; top: 80px; align-self: flex-start;
+  max-height: calc(100vh - 100px); overflow-y: auto;
+  border-left: 1px solid var(--ink);
+}
+
+/* ═══ SCREENSHOT ═══ */
+
+.screenshot-area {
+  aspect-ratio: 16/9;
+  background: var(--ink-10);
+  border: 1px solid var(--ink);
+  margin-bottom: 24px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+
+.screenshot-placeholder {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem; text-transform: uppercase;
+  color: var(--ink-30); letter-spacing: 0.12em;
+}
+
+.screenshot-nav {
+  position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 6px;
+}
+
+.screenshot-dot {
+  width: 8px; height: 8px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  cursor: pointer;
+}
+
+.screenshot-dot.active { background: var(--ink); }
+
+/* ═══ SEED VALUE ═══ */
+
+.seed-value-block {
+  text-align: center;
+  padding: 20px;
+  border: 1px solid var(--ink);
+  margin-bottom: 24px;
+}
+
+.seed-value-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--ink-60);
+  margin-bottom: 8px;
+}
+
+.seed-value-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.5rem; font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 16px;
+  word-break: break-all;
+}
+
+/* ═══ COORDINATE TABLE ═══ */
+
+.coord-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--ink);
+}
+
+.coord-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;
+  padding: 8px 12px; text-align: left;
+  border-bottom: 2px solid var(--ink);
+  color: var(--ink-60);
+}
+
+.coord-table td {
+  padding: 8px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  border-bottom: 1px solid var(--ink-10);
+}
+
+.coord-table tr:last-child td { border-bottom: none; }
+
+.coord-label { font-weight: 500; }
+
+.coord-value { letter-spacing: 0.04em; }
+
+/* ═══ INFO ROWS ═══ */
+
+.info-rows { display: flex; flex-direction: column; }
+
+.info-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--ink-10);
+  font-size: 0.75rem;
+}
+
+.info-row:last-child { border-bottom: none; }
+
+.info-row-label { color: var(--ink-60); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* ═══ ACTION ROW ═══ */
+
+.action-row {
+  display: flex; flex-direction: column; gap: 8px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid var(--ink);
+}
+
+/* ═══ FORM STEPS ═══ */
+
+.steps {
+  display: flex;
+  border: 1px solid var(--ink);
+  margin-bottom: 32px;
+}
+
+.step {
+  flex: 1; padding: 12px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em;
+  border-right: 1px solid var(--ink);
+  color: var(--ink-30); text-align: center;
+}
+
+.step:last-child { border-right: none; }
+
+.step.active { background: var(--ink); color: var(--paper); }
+
+.step.done { color: var(--ink-60); }
+
+.step-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem; display: block; margin-bottom: 4px;
+}
+
+.step-content {
+  padding: 32px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+.form-row { margin-bottom: 24px; }
+
+.form-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+.form-label .required { color: var(--red); }
+
+.form-hint {
+  font-size: 0.65rem; color: var(--ink-30); margin-top: 4px; letter-spacing: 0.04em;
+}
+
+.step-actions {
+  display: flex; justify-content: space-between;
+  margin-top: 32px; padding-top: 24px;
+  border-top: 2px solid var(--ink);
+}
+
+/* ═══ LOGIN ═══ */
+
+.login-center {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 50vh;
+}
+
+.login-card {
+  width: 420px; padding: 40px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+}
+
+.login-card h1 {
+  font-size: 1.5rem; text-align: center; margin-bottom: 24px;
+}
+
+.login-card .subtitle {
+  font-size: 0.7rem; color: var(--ink-60); text-align: center;
+  margin-bottom: 32px; letter-spacing: 0.04em;
+}
+
+.ms-btn {
+  width: 100%; padding: 14px 24px;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
+  font-size: 0.75rem; letter-spacing: 0.06em;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.ms-btn:hover { background: var(--ink); color: var(--paper); }
+
+.ms-logo {
+  display: inline-grid; grid-template-columns: 6px 6px; gap: 2px;
+}
+
+.ms-logo span {
+  width: 6px; height: 6px; display: block;
+}
+.ms-logo span:nth-child(1) { background: #F25022; }
+.ms-logo span:nth-child(2) { background: #7FBA00; }
+.ms-logo span:nth-child(3) { background: #00A4EF; }
+.ms-logo span:nth-child(4) { background: #FFB900; }
+
+/* ═══ COLLECTION GRID ═══ */
+
+.collection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--grid-gap);
+  background: var(--ink);
+  border: 1px solid var(--ink);
+}
+
+.collection-grid > * { background: var(--paper); }
+
+.collection-card {
+  padding: 16px; cursor: pointer;
+  border: none;
+  transition: background 100ms;
+}
+
+.collection-card:hover { background: var(--ink-10); }
+
+.collection-card-cover {
+  height: 100px;
+  background: var(--ink-10);
+  margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--ink);
+}
+
+/* ═══ ADMIN TABLE ═══ */
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--ink);
+}
+
+.admin-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;
+  padding: 10px 14px; text-align: left;
+  border-bottom: 2px solid var(--ink);
+  color: var(--ink-60);
+}
+
+.admin-table td {
+  padding: 12px 14px;
+  font-size: 0.75rem;
+  border-bottom: 1px solid var(--ink-10);
+}
+
+.admin-table tr:last-child td { border-bottom: none; }
+
+/* ═══ MODAL ═══ */
+
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(10,10,10,0.6);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.modal-box {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  padding: 32px; max-width: 500px; width: 90%;
+  max-height: 80vh; overflow-y: auto;
+}
+
+/* ═══ TOOLTIP ═══ */
+
+.tooltip-wrapper { position: relative; display: inline-block; }
+
+.tooltip-content {
+  display: none; position: absolute; bottom: calc(100% + 8px); left: 50%;
+  transform: translateX(-50%); z-index: 150;
+  background: var(--ink); color: var(--paper);
+  padding: 10px 14px; width: 260px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem; letter-spacing: 0.04em; line-height: 1.5;
+  border: 1px solid var(--ink);
+  text-transform: none;
+}
+
+.tooltip-wrapper:hover .tooltip-content { display: block; }
+
+/* ═══ NOTIFICATION / TOAST ═══ */
+
+.toast {
+  position: fixed; top: 80px; right: 24px; z-index: 300;
+  padding: 12px 20px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;
+  animation: toastIn 200ms ease-out;
+}
+
+@keyframes toastIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ═══ FOOTER ═══ */
+
+.footer {
+  border-top: 2px solid var(--ink);
+  margin-top: 64px; padding: 24px;
+  text-align: center;
+  font-size: 0.65rem; color: var(--ink-60);
+  letter-spacing: 0.06em;
+}
+
+/* ═══ UTILITY ═══ */
+
+.hidden { display: none !important; }
+
+.page { padding: 32px 0; }
+
+.page-title {
+  font-size: 2rem; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 12px;
+}
+
+.page-title .micro { font-size: 0.65rem; color: var(--ink-60); }
+
+.meta-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 24px;
+  font-size: 0.7rem;
+}
+
+.meta-bar-left { display: flex; gap: 16px; align-items: center; }
+
+.meta-bar-right { color: var(--ink-60); }
+
+.top-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+}
+
+.result-count {
+  font-size: 0.65rem; color: var(--ink-60); letter-spacing: 0.06em;
+}
+
+.pagination {
+  display: flex; justify-content: center; gap: 4px; margin-top: 32px;
+}
+
+.page-btn {
+  padding: 8px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  border: 1px solid var(--ink);
+  background: var(--paper); cursor: pointer;
+}
+
+.page-btn.active { background: var(--ink); color: var(--paper); }
+
+.page-btn:hover:not(.active) { background: var(--ink-10); }
+
+/* ═══ RESPONSIVE ═══ */
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .browse-layout { grid-template-columns: 1fr; }
+  .detail-layout { grid-template-columns: 1fr; }
+  .detail-aside { border-left: none; border-top: 1px solid var(--ink); position: static; }
+  .seed-grid { grid-template-columns: 1fr; }
+  .hero-title { font-size: clamp(2rem, 10vw, 4rem); }
+}
+
+@media (max-width: 480px) {
+  .container { padding: 0 12px; }
+  .nav-inner { padding: 0 12px; }
+  .login-card { width: 100%; }
+  .step-content { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  NAVIGATION                                 -->
+<!-- ═══════════════════════════════════════════ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand" onclick="navigate('home')">
+      <div class="nav-brand-symbol"></div>
+      <span class="macro">SEED VAULT</span>
+    </div>
+    <div class="nav-links" id="nav-links">
+      <button class="nav-link active" data-page="home" onclick="navigate('home')">[ 首页 ]</button>
+      <button class="nav-link" data-page="browse" onclick="navigate('browse')">[ 浏览 ]</button>
+      <button class="nav-link" data-page="submit" onclick="navigate('submit')">[ 投稿 ]</button>
+      <button class="nav-link" data-page="collections" onclick="navigate('collections')">[ 收藏夹 ]</button>
+      <button class="nav-link" data-page="admin" onclick="navigate('admin')" id="nav-admin" style="display:none">[ 审核 ]</button>
+    </div>
+    <div class="nav-right">
+      <button class="btn-icon" onclick="navigate('search-popup')" title="搜索">&#x2315;</button>
+      <button class="btn btn--sm" id="btn-login" onclick="navigate('login')">登录</button>
+      <button class="btn btn--sm hidden" id="btn-logout" onclick="doLogout()">退出</button>
+      <span class="micro hidden" id="user-badge" style="font-size:0.65rem"></span>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  HOME                                      -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="page" id="page-home">
+  <div class="hero container">
+    <div class="hero-overline">&copy; REGISTRY OF MINECRAFT WORLD SEEDS &mdash; EST. 2026</div>
+    <h1 class="hero-title macro">
+      <span class="hero-title-line">SEED</span>
+      <span class="hero-title-line">VAULT</span>
+    </h1>
+    <p class="hero-sub micro">
+      发现、分享、复制你喜欢的 Minecraft 世界。<br>
+      灵感来自斯瓦尔巴全球种子库。
+    </p>
+    <div class="quick-tags">
+      <button class="quick-tag micro" onclick="navigate('browse');filterByTag('survival')">&#x25A0; 生存向</button>
+      <button class="quick-tag micro" onclick="navigate('browse');filterByTag('speedrun')">&#x25B2; 速通向</button>
+      <button class="quick-tag micro" onclick="navigate('browse');filterByTag('building')">&#x25C6; 建筑向</button>
+      <button class="quick-tag micro" onclick="navigate('browse');filterByTag('hardcore')">&#x271D; 极限模式</button>
+    </div>
+    <div class="hero-registry">
+      REGISTRY ID: SV-2026-001 &bull; CLASSIFICATION: UNRESTRICTED &bull; REV 1.0
+    </div>
+  </div>
+
+  <div class="container">
+    <hr class="section-hr">
+    <div class="section-label">/// HOT SEEDS &mdash; 热门种子</div>
+    <div class="seed-grid" id="hot-seeds-grid"></div>
+  </div>
+
+  <div class="container">
+    <hr class="section-hr thin">
+    <div class="section-label">/// LATEST SUBMISSIONS &mdash; 最新投稿</div>
+    <div class="seed-grid" id="new-seeds-grid"></div>
+  </div>
+
+  <div class="container" style="text-align:center;padding:48px 0">
+    <p class="micro" style="margin-bottom:20px">没有找到想要的？</p>
+    <button class="btn btn--primary" onclick="navigate('submit')">[ 提交你的种子 ]</button>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  BROWSE                                    -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="page hidden" id="page-browse">
+  <div class="container">
+    <h2 class="page-title macro" style="font-size:1.8rem">[ 浏览种子 ]</h2>
+    <div class="top-bar" style="margin-top:8px">
+      <div style="display:flex;gap:8px;align-items:center">
+        <select class="select" style="width:140px" id="browse-sort" onchange="applyBrowseFilters()">
+          <option value="popular">最热</option>
+          <option value="newest">最新</option>
+          <option value="most_liked">最多点赞</option>
+          <option value="most_collected">最多收藏</option>
+        </select>
+        <button class="btn btn--sm" onclick="randomSeed()">[ 随机一个 ]</button>
+      </div>
+      <span class="result-count" id="browse-count">共 0 个种子</span>
+    </div>
+  </div>
+
+  <div class="container browse-layout" style="background:var(--ink);gap:var(--grid-gap)">
+    <div class="filter-panel" style="background:var(--paper)">
+      <div class="filter-group">
+        <label class="filter-label">版本端</label>
+        <select class="select" id="filter-edition" onchange="applyBrowseFilters()">
+          <option value="">全部</option>
+          <option value="java">Java 版</option>
+          <option value="bedrock">基岩版</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">版本号</label>
+        <select class="select" id="filter-version" onchange="applyBrowseFilters()">
+          <option value="">全部</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">世界类型</label>
+        <select class="select" id="filter-world" onchange="applyBrowseFilters()">
+          <option value="">全部</option>
+          <option value="normal">普通</option>
+          <option value="large_biomes">大型群系</option>
+          <option value="superflat">超平坦</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">玩法标签</label>
+        <div class="chip-group" id="filter-gameplay-tags"></div>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">特性标签</label>
+        <div class="chip-group" id="filter-feature-tags"></div>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Mod 环境</label>
+        <select class="select" id="filter-mod" onchange="applyBrowseFilters()">
+          <option value="">全部</option>
+          <option value="vanilla">仅原版</option>
+          <option value="modpack">含整合包</option>
+          <option value="neoforge">NeoForge</option>
+        </select>
+      </div>
+      <button class="btn btn--sm" onclick="resetBrowseFilters()" style="width:100%">[ 重置筛选 ]</button>
+    </div>
+    <div style="background:var(--paper);padding:20px;min-height:400px">
+      <div class="seed-grid" id="browse-seeds-grid" style="border:none;gap:16px;background:transparent"></div>
+      <div class="pagination" id="browse-pagination"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  SEED DETAIL                               -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="page hidden" id="page-detail">
+  <div class="container">
+    <button class="btn btn--sm" onclick="navigate('browse')" style="margin-bottom:16px">[ &larr; 返回 ]</button>
+    <div class="detail-layout" id="detail-content"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  SUBMIT                                    -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="page hidden" id="page-submit">
+  <div class="container" style="max-width:720px">
+    <h2 class="page-title macro" style="font-size:1.8rem">[ 提交种子 ]</h2>
+    <div class="steps" id="submit-steps">
+      <div class="step active" data-step="1"><span class="step-num">STEP 01</span>基本信息</div>
+      <div class="step" data-step="2"><span class="step-num">STEP 02</span>截图与坐标</div>
+      <div class="step" data-step="3"><span class="step-num">STEP 03</span>标题与标签</div>
+    </div>
+    <div class="step-content" id="submit-content"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  LOGIN                                     -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="page hidden" id="page-login">
+  <div class="login-center container">
+    <div class="login-card">
+      <h1 class="macro" style="font-size:1.4rem">登录 SEED VAULT</h1>
+      <p class="subtitle micro">使用 Microsoft 账号登录，自动创建账户</p>
+      <button class="ms-btn" onclick="showToast('已重定向至 Microsoft 登录')">
+        <span class="ms-logo">
+          <span></span><span></span><span></span><span></span>
+        </span>
+        使用 Microsoft 账号登录
+      </button>
+      <hr class="section-hr thin">
+      <div style="text-align:center">
+        <p class="micro" style="font-size:0.6rem;color:var(--ink-60);margin-bottom:8px">[ 开发模式登录 ]</p>
+        <div style="display:flex;gap:8px">
+          <select class="select" id="dev-user-select" style="flex:1">
+            <option value="1">Kaleid_5coper (Admin)</option>
+            <option value="2">方块猎人 (Player)</option>
+            <option value="3">建筑大师 (Player)</option>
+            <option value="4">速通玩家 (Player)</option>
+          </select>
+          <button class="btn btn--primary btn--sm" onclick="doDevLogin()">登录</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  COLLECTIONS                               -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="page hidden" id="page-collections">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <h2 class="page-title macro" style="font-size:1.8rem;margin-bottom:0">[ 收藏夹 ]</h2>
+      <button class="btn btn--primary btn--sm" onclick="toggleCreateCollection()">[ + 新建 ]</button>
+    </div>
+    <div class="collection-grid" id="collections-grid"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  ADMIN                                     -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="page hidden" id="page-admin">
+  <div class="container" style="max-width:900px">
+    <h2 class="page-title macro" style="font-size:1.8rem">[ 审核后台 ]</h2>
+    <div id="admin-content"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  FOOTER                                    -->
+<!-- ═══════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="container">
+    <span class="micro">SEED VAULT &copy; 2026 &mdash; 灵感来自斯瓦尔巴全球种子库</span>
+    <span style="margin:0 12px;color:var(--ink-30)">&#x25AA;</span>
+    <span class="micro">REGISTRY ID: SV-NO-0001 &bull; CLASS: UNRESTRICTED</span>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  MODALS                                    -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-reject">
+  <div class="modal-box">
+    <h3 class="micro" style="font-size:0.8rem;margin-bottom:16px">[ 拒绝原因 ]</h3>
+    <input class="input" id="reject-reason" placeholder="请填写拒绝原因">
+    <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+      <button class="btn btn--sm" onclick="closeModal('modal-reject')">取消</button>
+      <button class="btn btn--danger btn--sm" onclick="doReject()">确认拒绝</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modal-collection">
+  <div class="modal-box">
+    <h3 class="micro" style="font-size:0.8rem;margin-bottom:16px">[ 新建收藏夹 ]</h3>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <input class="input" id="coll-name" placeholder="收藏夹名称（必填）" maxlength="50">
+      <textarea class="input" id="coll-desc" placeholder="描述（选填）" rows="2" maxlength="200"></textarea>
+      <label style="display:flex;align-items:center;gap:8px;font-size:0.7rem;cursor:pointer">
+        <input type="checkbox" id="coll-public"> 公开收藏夹
+      </label>
+      <button class="btn btn--primary" onclick="doCreateCollection()">[ 创建 ]</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modal-collection-detail">
+  <div class="modal-box" style="max-width:800px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 class="micro" style="font-size:0.8rem" id="modal-coll-title"></h3>
+      <button class="btn btn--sm" onclick="closeModal('modal-collection-detail')">[ 关闭 ]</button>
+    </div>
+    <div class="seed-grid" id="modal-coll-seeds" style="border:none;gap:12px;background:transparent;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  TOAST                                     -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="toast hidden" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════
+   SEED VAULT — APPLICATION ENGINE
+   ═══════════════════════════════════════════ */
+
+// ── MOCK DATA ──
+
+const TAGS = [
+  { key: 'survival', label: '生存向', icon: '■', category: 'gameplay', desc: '资源点丰富的种子。不一定利好速通——例如古代城市与速通几乎互斥，但属于高资源点，归属此标签。' },
+  { key: 'speedrun', label: '速通向', icon: '▲', category: 'gameplay', desc: '速通向种子。路线高效、关键结构距离近，适合追求通关速度的玩家。' },
+  { key: 'building', label: '建筑向', icon: '◆', category: 'gameplay', desc: '建筑向种子。要求带有至少一个奇观（自然或结构），对资源点无硬性要求。' },
+  { key: 'hardcore', label: '极限模式', icon: '✝', category: 'gameplay', desc: '极限模式种子。沿用社区极限生存标准——高风险、高回报，适合硬核挑战。' },
+  { key: 'challenge', label: '挑战向', icon: '◎', category: 'gameplay', desc: '挑战向种子。沿用社区挑战标准——特殊规则或极端条件开局，如孤岛、空岛、单群系。' },
+  { key: 'spawn_wonder', label: '出生点奇观', icon: '◆', category: 'feature' },
+  { key: 'rare_biome', label: '稀有群系', icon: '◆', category: 'feature' },
+  { key: 'terrain', label: '地形奇观', icon: '◆', category: 'feature' },
+  { key: 'village', label: '近出生点村庄', icon: '◆', category: 'feature' },
+  { key: 'stronghold', label: '近出生点要塞', icon: '◆', category: 'feature' },
+  { key: 'ancient_city', label: '古代城市', icon: '◆', category: 'feature' },
+  { key: 'trial_chamber', label: '试炼室集群', icon: '◆', category: 'feature' },
+  { key: 'diamond', label: '资源富集', icon: '◆', category: 'feature' },
+  { key: 'island', label: '孤岛生存', icon: '◆', category: 'feature' },
+];
+
+const VERSIONS = [
+  { edition: 'java', version: '1.21.5', is_latest: true },
+  { edition: 'java', version: '1.21.4', is_latest: false },
+  { edition: 'java', version: '1.21.1', is_latest: false },
+  { edition: 'java', version: '1.20.6', is_latest: false },
+  { edition: 'java', version: '1.20.1', is_latest: false },
+  { edition: 'bedrock', version: '1.21.70', is_latest: true },
+  { edition: 'bedrock', version: '1.21.60', is_latest: false },
+  { edition: 'bedrock', version: '1.21.50', is_latest: false },
+];
+
+const USERS = {
+  1: { id: 1, display_name: 'Kaleid_5coper', minecraft_username: 'Kaleid_5coper', owns_java_edition: true, role: 'admin' },
+  2: { id: 2, display_name: '方块猎人', minecraft_username: 'BlockHunter', owns_java_edition: true, role: 'player' },
+  3: { id: 3, display_name: '建筑大师', minecraft_username: 'BuilderPro', owns_java_edition: false, role: 'player' },
+  4: { id: 4, display_name: '速通玩家', minecraft_username: 'SpeedRunner', owns_java_edition: true, role: 'player' },
+};
+
+const SEEDS = [
+  {
+    id: 1, title: '出生点下方古代城市', seed_value: '123456789',
+    description: '出生点正下方 Y=-30 处就是一座完整的古代城市，附带末地传送门。适合速通和建筑向玩家。\n\n关键坐标：古城入口 X:120 Z:64，末地传送门 X:800 Z:32。已实测 1.21.4 和 1.21.5 均可用。',
+    edition: 'java', tested_version: '1.21.4', compatible_range: '1.21.4 ~ 1.21.5',
+    world_type: 'normal', mod_env: 'vanilla', spawn_x: 0, spawn_z: 64,
+    status: 'approved', like_count: 42, collection_count: 3, view_count: 1234,
+    tags: ['survival', 'speedrun', 'ancient_city', 'stronghold'],
+    uploader_id: 1,
+    key_coords: [
+      { label: '古代城市入口', x: 120, y: -30, z: 64 },
+      { label: '末地传送门', x: 800, y: null, z: 32 },
+    ],
+    screenshot_count: 3,
+  },
+  {
+    id: 2, title: '蘑菇岛出生点', seed_value: '-8765432109876543210',
+    description: '出生在一座巨大的蘑菇岛上，四周环海。岛上没有敌对生物，非常适合生存建造。附近有海底神殿。',
+    edition: 'java', tested_version: '1.21.5', compatible_range: null,
+    world_type: 'normal', mod_env: 'vanilla', spawn_x: 16, spawn_z: -128,
+    status: 'approved', like_count: 28, collection_count: 5, view_count: 890,
+    tags: ['survival', 'building', 'rare_biome', 'spawn_wonder'],
+    uploader_id: 2,
+    key_coords: [
+      { label: '海底神殿', x: 320, y: 62, z: -200 },
+      { label: '巨型蘑菇', x: 50, y: 80, z: -100 },
+    ],
+    screenshot_count: 2,
+  },
+  {
+    id: 3, title: '村庄包围的试炼室', seed_value: '555666777',
+    description: '三个村庄围绕一座试炼室，出生即可交易和挑战。平原群系，资源丰富。每个村庄都有铁匠铺。',
+    edition: 'java', tested_version: '1.21.5', compatible_range: null,
+    world_type: 'normal', mod_env: 'vanilla', spawn_x: 0, spawn_z: 0,
+    status: 'approved', like_count: 67, collection_count: 12, view_count: 2300,
+    tags: ['survival', 'challenge', 'village', 'trial_chamber', 'diamond'],
+    uploader_id: 4,
+    key_coords: [
+      { label: '村庄 A（铁匠铺）', x: -96, y: 65, z: 128 },
+      { label: '村庄 B（图书馆）', x: 200, y: 64, z: -80 },
+      { label: '村庄 C', x: 350, y: 63, z: 300 },
+      { label: '试炼室', x: 0, y: 30, z: 0 },
+    ],
+    screenshot_count: 4,
+  },
+  {
+    id: 4, title: '巨型针叶林生存', seed_value: '111222333444555',
+    description: '大型群系模式下的巨型针叶林，出生点即有一片巨型云杉。适合喜欢雪地建筑的玩家。',
+    edition: 'java', tested_version: '1.20.6', compatible_range: null,
+    world_type: 'large_biomes', mod_env: 'vanilla', spawn_x: 50, spawn_z: 200,
+    status: 'approved', like_count: 15, collection_count: 2, view_count: 450,
+    tags: ['survival', 'building', 'terrain'],
+    uploader_id: 3,
+    key_coords: [{ label: '云杉村庄', x: 300, y: 68, z: 400 }],
+    screenshot_count: 1,
+  },
+  {
+    id: 5, title: 'Terralith 奇幻地形', seed_value: 'terralith_dream_2026',
+    description: '在 Terralith 2.5.x 模组下生成的绝美地形。出生点位于悬崖边，俯瞰壮丽的峡谷。必须安装 Terralith 模组才能复现。',
+    edition: 'java', tested_version: '1.20.1', compatible_range: null,
+    world_type: 'normal', mod_env: 'modpack', modpack_name: 'Terralith 2.5.4', modpack_version: '2.5.4',
+    spawn_x: -400, spawn_z: 600,
+    status: 'approved', like_count: 31, collection_count: 4, view_count: 780,
+    tags: ['building', 'terrain', 'spawn_wonder'],
+    uploader_id: 2,
+    key_coords: [
+      { label: '峡谷观景点', x: -400, y: 120, z: 600 },
+      { label: '樱花林', x: -200, y: 75, z: 800 },
+    ],
+    screenshot_count: 2,
+  },
+  {
+    id: 6, title: '基岩版孤岛挑战', seed_value: '42069',
+    description: '基岩版 1.21.60 测试。出生在一座小岛上，只有一棵树。经典孤岛生存开局，脚下就是废弃矿井。',
+    edition: 'bedrock', tested_version: '1.21.60', compatible_range: '1.21.60 ~ 1.21.70',
+    world_type: 'normal', mod_env: 'vanilla', spawn_x: 8, spawn_z: 8,
+    status: 'approved', like_count: 89, collection_count: 20, view_count: 3400,
+    tags: ['survival', 'challenge', 'island', 'diamond'],
+    uploader_id: 1,
+    key_coords: [
+      { label: '废弃矿井入口（水下）', x: 10, y: 45, z: 10 },
+      { label: '沉船', x: 120, y: 55, z: -80 },
+    ],
+    screenshot_count: 3,
+  },
+  {
+    id: 7, title: '基岩版村庄集群', seed_value: 'bedrock_village_hub',
+    description: '出生点 500 格内有 6 个村庄。平原、沙漠、雪地村庄各两个。基岩版 1.21.70 最新版测试。',
+    edition: 'bedrock', tested_version: '1.21.70', compatible_range: null,
+    world_type: 'normal', mod_env: 'vanilla', spawn_x: 100, spawn_z: -50,
+    status: 'approved', like_count: 22, collection_count: 3, view_count: 670,
+    tags: ['survival', 'village', 'diamond'],
+    uploader_id: 3,
+    key_coords: [
+      { label: '沙漠村庄 1', x: 200, y: 65, z: -50 },
+      { label: '平原村庄 1', x: 100, y: 63, z: 200 },
+      { label: '雪地村庄 1', x: -150, y: 68, z: -100 },
+    ],
+    screenshot_count: 1,
+  },
+  {
+    id: 8, title: '超平坦红石实验室', seed_value: 'redstone_lab_001',
+    description: '基岩版超平坦世界，适合红石测试和建筑。预设为红石 Ready。',
+    edition: 'bedrock', tested_version: '1.21.60', compatible_range: null,
+    world_type: 'superflat', mod_env: 'vanilla', spawn_x: 0, spawn_z: 0,
+    status: 'approved', like_count: 8, collection_count: 1, view_count: 300,
+    tags: ['building', 'challenge'],
+    uploader_id: 2,
+    key_coords: [{ label: '史莱姆区块', x: 16, y: 4, z: 16 }],
+    screenshot_count: 1,
+  },
+  {
+    id: 9, title: '待审核：苍白花园开局', seed_value: 'pale_garden_test',
+    description: '1.21.5 新版苍白花园群系，出生点就在苍白橡树旁边。',
+    edition: 'java', tested_version: '1.21.5', compatible_range: null,
+    world_type: 'normal', mod_env: 'vanilla', spawn_x: -20, spawn_z: 40,
+    status: 'pending', like_count: 0, collection_count: 0, view_count: 0,
+    tags: ['survival', 'rare_biome', 'spawn_wonder'],
+    uploader_id: 3,
+    key_coords: [{ label: '苍白橡树', x: -20, y: 64, z: 40 }],
+    screenshot_count: 1,
+  },
+];
+
+const COLLECTIONS = [
+  { id: 1, name: '1.21.4 生存好种', description: '适合开新档的种子', is_public: true, seed_count: 5, cover_seed_id: 1, seed_ids: [1, 2, 3, 6, 7] },
+  { id: 2, name: '建筑灵感', description: '地形和村庄都很漂亮的种子', is_public: true, seed_count: 3, cover_seed_id: 5, seed_ids: [2, 5, 7] },
+  { id: 3, name: '速通练习', description: '速通向种子合集', is_public: false, seed_count: 3, cover_seed_id: 1, seed_ids: [1, 3, 6] },
+];
+
+// ── STATE ──
+
+let currentUser = null;
+let currentPage = 'home';
+let browseFilters = { edition: '', version: '', worldType: '', tag: '', modEnv: '', sort: 'popular', page: 1 };
+let submitStep = 1;
+let submitData = { seedValue: '', edition: 'java', testedVersion: '', worldType: 'normal', modEnv: 'vanilla', modpackName: '', modpackVersion: '', spawnX: 0, spawnZ: 0, coords: [], screenshotCount: 0, title: '', description: '', tags: [] };
+let rejectTargetId = null;
+const PAGE_SIZE = 24;
+
+// ── RENDER HELPERS ──
+
+function tagInfo(key) { return TAGS.find(t => t.key === key); }
+
+function formatCount(n) {
+  if (n >= 10000) return (n / 10000).toFixed(1) + '万';
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+  return String(n);
+}
+
+function worldTypeLabel(wt) {
+  return { normal: '普通', large_biomes: '大型群系', superflat: '超平坦' }[wt] || wt;
+}
+
+function modLabel(me) {
+  return { vanilla: '原版', modpack: '整合包', neoforge: 'NeoForge' }[me] || me;
+}
+
+function getTagDesc(key) {
+  const t = TAGS.find(t => t.key === key);
+  return t && t.desc ? t.desc : '';
+}
+
+// ── SEED CARD ──
+
+function renderSeedCard(seed) {
+  const uploader = USERS[seed.uploader_id];
+  const uploaderName = uploader ? (uploader.minecraft_username || uploader.display_name) : 'Unknown';
+  const editionTag = seed.edition === 'java'
+    ? '<span class="tag tag--java">JAVA ' + seed.tested_version + '</span>'
+    : '<span class="tag tag--bedrock">BEDROCK ' + seed.tested_version + '</span>';
+  const tagChips = seed.tags.slice(0, 2).map(k => {
+    const t = tagInfo(k);
+    return t ? '<span class="tag">' + t.icon + ' ' + t.label + '</span>' : '';
+  }).join('');
+
+  return '<div class="card" onclick="viewSeed(' + seed.id + ')" style="cursor:pointer">' +
+    '<div class="card-cover">' +
+      '<span class="card-cover-placeholder">[ SCREENSHOT ' + seed.screenshot_count + ' ]</span>' +
+      '<button class="btn btn--sm" style="position:absolute;top:8px;right:8px;font-size:0.6rem;padding:4px 8px" onclick="event.stopPropagation();copySeedValue(\'' + seed.seed_value + '\')">[ COPY ]</button>' +
+    '</div>' +
+    '<div class="card-body">' +
+      '<div class="card-title">' + seed.title + '</div>' +
+      '<div class="card-desc">' + (seed.description.split('\n')[0] || '') + '</div>' +
+      '<div class="card-tags">' + editionTag + tagChips + '</div>' +
+      '<div class="micro" style="display:flex;gap:12px;color:var(--ink-60)">' +
+        '<span>' + uploaderName + '</span>' +
+        '<span>&#x2665; ' + formatCount(seed.like_count) + '</span>' +
+        '<span>&#x25A0; ' + seed.collection_count + '</span>' +
+        '<span>&#x25C9; ' + formatCount(seed.view_count) + '</span>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+// ── NAVIGATION ──
+
+function navigate(page, data) {
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+  const target = document.getElementById('page-' + page);
+  if (target) target.classList.remove('hidden');
+
+  document.querySelectorAll('.nav-link').forEach(l => {
+    l.classList.toggle('active', l.dataset.page === page);
+  });
+
+  if (page === 'home') renderHome();
+  if (page === 'browse') renderBrowse();
+  if (page === 'submit') renderSubmitStep();
+  if (page === 'collections') renderCollections();
+  if (page === 'admin') renderAdmin();
+  if (page === 'login') { /* static */ }
+  if (data && page === 'detail') renderSeedDetail(data);
+
+  updateNavAuth();
+  window.scrollTo(0, 0);
+}
+
+function updateNavAuth() {
+  document.getElementById('btn-login').classList.toggle('hidden', !!currentUser);
+  document.getElementById('btn-logout').classList.toggle('hidden', !currentUser);
+  document.getElementById('nav-admin').style.display = (currentUser && currentUser.role === 'admin') ? '' : 'none';
+  const badge = document.getElementById('user-badge');
+  badge.classList.toggle('hidden', !currentUser);
+  if (currentUser) badge.textContent = '[ ' + (currentUser.minecraft_username || currentUser.display_name) + ' ]';
+}
+
+// ── TOAST ──
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  setTimeout(() => t.classList.add('hidden'), 2500);
+}
+
+// ── HOME ──
+
+function renderHome() {
+  const hot = [...SEEDS].filter(s => s.status === 'approved').sort((a, b) => b.like_count - a.like_count).slice(0, 8);
+  const newest = [...SEEDS].filter(s => s.status === 'approved').sort((a, b) => b.id - a.id).slice(0, 8);
+  document.getElementById('hot-seeds-grid').innerHTML = hot.map(renderSeedCard).join('');
+  document.getElementById('new-seeds-grid').innerHTML = newest.map(renderSeedCard).join('');
+}
+
+// ── BROWSE ──
+
+function filterByTag(tag) {
+  browseFilters.tag = tag;
+  browseFilters.page = 1;
+  renderBrowse();
+}
+
+function renderBrowse() {
+  // Version options
+  const edition = document.getElementById('filter-edition').value;
+  const verSelect = document.getElementById('filter-version');
+  verSelect.innerHTML = '<option value="">全部</option>';
+  if (edition) {
+    VERSIONS.filter(v => v.edition === edition).forEach(v => {
+      verSelect.innerHTML += '<option value="' + v.version + '">' + v.version + (v.is_latest ? ' (最新)' : '') + '</option>';
+    });
+  }
+  // Sync select values from state
+  document.getElementById('filter-edition').value = browseFilters.edition;
+  document.getElementById('filter-version').value = browseFilters.version;
+  document.getElementById('filter-world').value = browseFilters.worldType;
+  document.getElementById('filter-mod').value = browseFilters.modEnv;
+  document.getElementById('browse-sort').value = browseFilters.sort;
+
+  // Filter seeds
+  let filtered = SEEDS.filter(s => s.status === 'approved');
+  if (browseFilters.edition) filtered = filtered.filter(s => s.edition === browseFilters.edition);
+  if (browseFilters.version) filtered = filtered.filter(s => s.tested_version === browseFilters.version);
+  if (browseFilters.worldType) filtered = filtered.filter(s => s.world_type === browseFilters.worldType);
+  if (browseFilters.modEnv) filtered = filtered.filter(s => s.mod_env === browseFilters.modEnv);
+  if (browseFilters.tag) filtered = filtered.filter(s => s.tags.includes(browseFilters.tag));
+
+  if (browseFilters.sort === 'newest') filtered.sort((a, b) => b.id - a.id);
+  else if (browseFilters.sort === 'most_liked') filtered.sort((a, b) => b.like_count - a.like_count);
+  else if (browseFilters.sort === 'most_collected') filtered.sort((a, b) => b.collection_count - a.collection_count);
+  else filtered.sort((a, b) => b.like_count - a.like_count); // popular
+
+  document.getElementById('browse-count').textContent = '共 ' + filtered.length + ' 个种子';
+  document.getElementById('browse-seeds-grid').innerHTML = filtered.length > 0
+    ? filtered.map(renderSeedCard).join('')
+    : '<div class="micro" style="padding:40px;text-align:center;color:var(--ink-30);grid-column:1/-1">[ 没有符合条件的结果 ]</div>';
+
+  // Pagination
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  let pagesHtml = '';
+  for (let i = 1; i <= Math.min(totalPages, 10); i++) {
+    pagesHtml += '<button class="page-btn' + (i === browseFilters.page ? ' active' : '') + '" onclick="goPage(' + i + ')">' + i + '</button>';
+  }
+  document.getElementById('browse-pagination').innerHTML = totalPages > 1 ? pagesHtml : '';
+}
+
+function goPage(p) { browseFilters.page = p; renderBrowse(); }
+
+function applyBrowseFilters() {
+  browseFilters.edition = document.getElementById('filter-edition').value;
+  browseFilters.version = document.getElementById('filter-version').value;
+  browseFilters.worldType = document.getElementById('filter-world').value;
+  browseFilters.modEnv = document.getElementById('filter-mod').value;
+  browseFilters.sort = document.getElementById('browse-sort').value;
+  browseFilters.page = 1;
+  renderBrowse();
+}
+
+function resetBrowseFilters() {
+  browseFilters = { edition: '', version: '', worldType: '', tag: '', modEnv: '', sort: 'popular', page: 1 };
+  renderBrowse();
+}
+
+function randomSeed() {
+  const approved = SEEDS.filter(s => s.status === 'approved');
+  if (approved.length === 0) return;
+  const seed = approved[Math.floor(Math.random() * approved.length)];
+  viewSeed(seed.id);
+}
+
+// ── SEED DETAIL ──
+
+function viewSeed(id) {
+  const seed = SEEDS.find(s => s.id === id);
+  if (!seed) return showToast('种子不存在');
+  navigate('detail', seed);
+}
+
+function renderSeedDetail(seed) {
+  const uploader = USERS[seed.uploader_id];
+  const uploaderName = uploader ? (uploader.minecraft_username || uploader.display_name) : 'Unknown';
+  const editionLabel = seed.edition === 'java' ? 'JAVA' : 'BEDROCK';
+  const editionTagClass = seed.edition === 'java' ? 'tag--java' : 'tag--bedrock';
+
+  const coordsHtml = seed.key_coords.length > 0
+    ? '<table class="coord-table" style="margin-top:24px"><thead><tr><th>LABEL</th><th>X</th><th>Y</th><th>Z</th><th></th></tr></thead><tbody>' +
+      seed.key_coords.map(kc =>
+        '<tr><td class="coord-label">' + kc.label + '</td><td class="coord-value">' + kc.x + '</td><td class="coord-value">' + (kc.y !== null ? kc.y : '--') + '</td><td class="coord-value">' + kc.z + '</td><td><button class="btn btn--sm" style="padding:2px 8px;font-size:0.6rem" onclick="copyCoord(\'' + kc.label + '\',' + kc.x + ',' + (kc.y !== null ? kc.y : 'null') + ',' + kc.z + ')">[ COPY ]</button></td></tr>'
+      ).join('') +
+      '</tbody></table>'
+    : '';
+
+  const tagHtml = seed.tags.map(k => {
+    const t = tagInfo(k);
+    return t ? '<span class="tag">' + t.icon + ' ' + t.label + '</span>' : '';
+  }).join(' ');
+
+  const verifiedBadge = uploader && uploader.owns_java_edition
+    ? '<span class="tag tag--java" style="font-size:0.55rem">&#x25C9; 正版玩家</span>'
+    : '';
+
+  const html =
+    '<div class="detail-main">' +
+      '<div class="screenshot-area">' +
+        '<span class="screenshot-placeholder">[ SCREENSHOT ' + seed.screenshot_count + ' &mdash; demo/pic' + seed.id + '.webp ]</span>' +
+        '<div class="screenshot-nav">' +
+          Array.from({ length: Math.min(seed.screenshot_count, 5) }, (_, i) =>
+            '<span class="screenshot-dot' + (i === 0 ? ' active' : '') + '"></span>'
+          ).join('') +
+        '</div>' +
+      '</div>' +
+      '<h2 class="macro" style="font-size:1.6rem;margin-bottom:16px">' + seed.title + '</h2>' +
+      '<div class="data" style="line-height:1.7">' + seed.description.replace(/\n/g, '<br>') + '</div>' +
+      coordsHtml +
+    '</div>' +
+    '<div class="detail-aside">' +
+      '<div class="seed-value-block">' +
+        '<div class="seed-value-label">/// SEED VALUE</div>' +
+        '<div class="seed-value-code">' + seed.seed_value + '</div>' +
+        '<button class="btn btn--primary" onclick="copySeedValue(\'' + seed.seed_value + '\')" style="width:100%">[ COPY SEED VALUE ]</button>' +
+      '</div>' +
+      '<div class="info-rows">' +
+        '<div class="info-row"><span class="info-row-label">版本端</span><span class="tag ' + editionTagClass + '">' + editionLabel + ' &middot; ' + seed.tested_version + '</span></div>' +
+        (seed.compatible_range ? '<div class="info-row"><span class="info-row-label">兼容范围</span><span class="data">' + seed.compatible_range + '</span></div>' : '') +
+        '<div class="info-row"><span class="info-row-label">世界类型</span><span class="data">' + worldTypeLabel(seed.world_type) + '</span></div>' +
+        '<div class="info-row"><span class="info-row-label">Mod 环境</span><span class="data">' + modLabel(seed.mod_env) + (seed.modpack_name ? ' (' + seed.modpack_name + ')' : '') + '</span></div>' +
+        '<div class="info-row"><span class="info-row-label">出生点</span><span class="data">X: ' + seed.spawn_x + ' Z: ' + seed.spawn_z + '</span></div>' +
+      '</div>' +
+      '<div style="margin:16px 0">' + tagHtml + '</div>' +
+      '<div class="info-rows" style="padding-top:12px;border-top:1px solid var(--ink)">' +
+        '<div class="info-row">' +
+          '<span style="display:flex;align-items:center;gap:6px">[ ' + (uploader ? uploaderName[0] : '?') + ' ] ' + uploaderName + '</span>' +
+          verifiedBadge +
+        '</div>' +
+        '<div class="info-row"><span class="info-row-label">提交日期</span><span class="data">2026-05-' + (20 - seed.id) + '</span></div>' +
+      '</div>' +
+      '<div class="action-row">' +
+        '<button class="btn" onclick="toggleLike(' + seed.id + ')" style="width:100%">[ &#x2665; 点赞 (' + seed.like_count + ') ]</button>' +
+        '<button class="btn btn--sm" style="width:100%" onclick="showToast(\'举报已提交\')">[ &#x2691; 举报 ]</button>' +
+      '</div>' +
+    '</div>';
+
+  document.getElementById('detail-content').innerHTML = html;
+}
+
+function copySeedValue(val) {
+  navigator.clipboard.writeText(val).then(() => showToast('种子值已复制到剪贴板'));
+}
+
+function copyCoord(label, x, y, z) {
+  const text = y !== null ? label + ' X:' + x + ' Y:' + y + ' Z:' + z : label + ' X:' + x + ' Z:' + z;
+  navigator.clipboard.writeText(text).then(() => showToast('坐标已复制'));
+}
+
+function toggleLike(id) {
+  if (!currentUser) { showToast('请先登录'); return; }
+  showToast('已切换点赞状态');
+}
+
+// ── SUBMIT ──
+
+function renderSubmitStep() {
+  const steps = document.querySelectorAll('#submit-steps .step');
+  steps.forEach(s => {
+    const sn = parseInt(s.dataset.step);
+    s.classList.remove('active', 'done');
+    if (sn === submitStep) s.classList.add('active');
+    else if (sn < submitStep) s.classList.add('done');
+  });
+
+  const ed = submitData.edition;
+  const verOptions = VERSIONS.filter(v => v.edition === ed).map(v =>
+    '<option value="' + v.version + '"' + (submitData.testedVersion === v.version ? ' selected' : '') + '>' + v.version + (v.is_latest ? ' (最新)' : '') + '</option>'
+  ).join('');
+
+  const gameplayTags = TAGS.filter(t => t.category === 'gameplay');
+  const featureTags = TAGS.filter(t => t.category === 'feature');
+
+  let content = '';
+  if (submitStep === 1) {
+    content =
+      '<div class="form-row"><label class="form-label">种子值 <span class="required">*</span></label><input class="input" id="sub-seedval" value="' + escHtml(submitData.seedValue) + '" placeholder="如 123456789 或 Glacier" maxlength="64"></div>' +
+      '<div class="form-row"><label class="form-label">版本端 <span class="required">*</span></label><select class="select" id="sub-edition" onchange="submitData.edition=this.value;renderSubmitStep()"><option value="java"' + (ed === 'java' ? ' selected' : '') + '>Java 版</option><option value="bedrock"' + (ed === 'bedrock' ? ' selected' : '') + '>基岩版</option></select></div>' +
+      '<div class="form-row"><label class="form-label">测试版本 <span class="required">*</span></label><select class="select" id="sub-version">' + verOptions + '</select></div>' +
+      '<div class="form-row"><label class="form-label">世界类型 <span class="required">*</span></label><select class="select" id="sub-world"><option value="normal"' + (submitData.worldType === 'normal' ? ' selected' : '') + '>普通</option><option value="large_biomes"' + (submitData.worldType === 'large_biomes' ? ' selected' : '') + '>大型群系</option><option value="superflat"' + (submitData.worldType === 'superflat' ? ' selected' : '') + '>超平坦</option></select></div>' +
+      '<div class="form-row"><label class="form-label">Mod 环境 <span class="required">*</span></label><select class="select" id="sub-mod" onchange="submitData.modEnv=this.value;renderSubmitStep()"><option value="vanilla"' + (submitData.modEnv === 'vanilla' ? ' selected' : '') + '>原版</option><option value="modpack"' + (submitData.modEnv === 'modpack' ? ' selected' : '') + '>整合包</option><option value="neoforge"' + (submitData.modEnv === 'neoforge' ? ' selected' : '') + '>NeoForge</option></select></div>' +
+      (submitData.modEnv === 'modpack'
+        ? '<div class="form-row"><label class="form-label">整合包名称 <span class="required">*</span></label><input class="input" id="sub-modpack-name" value="' + escHtml(submitData.modpackName) + '" placeholder="如 Terralith 2.5.4"></div>' +
+          '<div class="form-row"><label class="form-label">整合包版本</label><input class="input" id="sub-modpack-ver" value="' + escHtml(submitData.modpackVersion) + '" placeholder="如 2.5.4"></div>'
+        : '') +
+      '<div class="step-actions"><span></span><button class="btn btn--primary" onclick="submitNext()">[ NEXT &rarr; ]</button></div>';
+  } else if (submitStep === 2) {
+    const coordRows = submitData.coords.map((c, i) =>
+      '<div style="display:flex;gap:8px;margin-top:8px">' +
+        '<input class="input" id="sub-coord-label-' + i + '" value="' + escHtml(c.label) + '" placeholder="名称" style="width:140px">' +
+        '<input class="input" id="sub-coord-x-' + i + '" value="' + c.x + '" placeholder="X" style="width:100px">' +
+        '<input class="input" id="sub-coord-y-' + i + '" value="' + (c.y !== null ? c.y : '') + '" placeholder="Y（可选）" style="width:100px">' +
+        '<input class="input" id="sub-coord-z-' + i + '" value="' + c.z + '" placeholder="Z" style="width:100px">' +
+      '</div>'
+    ).join('');
+
+    content =
+      '<div class="form-row"><label class="form-label">截图 <span class="required">*</span>（1-5 张）</label>' +
+        '<div style="border:1px solid var(--ink);padding:20px;text-align:center;cursor:pointer" onclick="submitData.screenshotCount=Math.min(submitData.screenshotCount+1,5);renderSubmitStep()">' +
+          '<span class="micro" style="color:var(--ink-60)">[ CLICK TO ADD SCREENSHOT — DEMO MODE ]</span>' +
+        '</div>' +
+        '<p class="form-hint">已选择 ' + submitData.screenshotCount + ' 张（demo: pic' + (submitData.screenshotCount > 0 ? '1-' + submitData.screenshotCount : '?') + '.webp）</p></div>' +
+      '<div class="form-row"><label class="form-label">出生点坐标 <span class="required">*</span></label>' +
+        '<div style="display:flex;gap:8px">' +
+          '<input class="input" id="sub-spawn-x" value="' + submitData.spawnX + '" placeholder="X" style="width:120px">' +
+          '<input class="input" id="sub-spawn-z" value="' + submitData.spawnZ + '" placeholder="Z" style="width:120px">' +
+        '</div></div>' +
+      '<div class="form-row"><label class="form-label">关键坐标</label>' + coordRows +
+        '<button class="btn btn--sm" style="margin-top:8px" onclick="submitData.coords.push({label:\'\',x:0,y:null,z:0});renderSubmitStep()">[ + 添加坐标 ]</button></div>' +
+      '<div class="step-actions"><button class="btn" onclick="submitPrev()">[ &larr; PREV ]</button><button class="btn btn--primary" onclick="submitNext()">[ NEXT &rarr; ]</button></div>';
+  } else if (submitStep === 3) {
+    const gameplayChips = gameplayTags.map(t =>
+      '<div class="tooltip-wrapper" style="display:inline-block">' +
+        '<button class="chip' + (submitData.tags.includes(t.key) ? ' chip--active' : '') + '" onclick="toggleSubmitTag(\'' + t.key + '\')">' + t.icon + ' ' + t.label + '</button>' +
+        (t.desc ? '<div class="tooltip-content">' + t.desc + '</div>' : '') +
+      '</div>'
+    ).join(' ');
+
+    const featureChips = featureTags.map(t =>
+      '<button class="chip' + (submitData.tags.includes(t.key) ? ' chip--active' : '') + '" onclick="toggleSubmitTag(\'' + t.key + '\')">' + t.icon + ' ' + t.label + '</button>'
+    ).join(' ');
+
+    content =
+      '<div class="form-row"><label class="form-label">标题 <span class="required">*</span>（≤50字）</label><input class="input" id="sub-title" value="' + escHtml(submitData.title) + '" maxlength="50" placeholder="为你的种子起个名字"></div>' +
+      '<div class="form-row"><label class="form-label">描述 <span class="required">*</span>（≤500字）</label><textarea class="input" id="sub-desc" maxlength="500" placeholder="说明卖点、关键坐标等" rows="4">' + escHtml(submitData.description) + '</textarea></div>' +
+      '<div class="form-row"><label class="form-label">玩法标签 <span class="required">*</span>（必选其一）</label><div class="chip-group">' + gameplayChips + '</div></div>' +
+      '<div class="form-row"><label class="form-label">特性标签（可多选）</label><div class="chip-group">' + featureChips + '</div></div>' +
+      '<div class="step-actions"><button class="btn" onclick="submitPrev()">[ &larr; PREV ]</button><button class="btn btn--primary" onclick="doSubmit()">[ SUBMIT ]</button></div>';
+  }
+
+  document.getElementById('submit-content').innerHTML = content;
+}
+
+function escHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+function submitPrev() { if (submitStep > 1) { collectSubmitStep(); submitStep--; renderSubmitStep(); } }
+
+function submitNext() {
+  if (submitStep === 1) {
+    const sv = document.getElementById('sub-seedval')?.value || '';
+    const tv = document.getElementById('sub-version')?.value || '';
+    if (!sv || !tv) { showToast('请填写种子值和测试版本'); return; }
+  }
+  if (submitStep === 2) {
+    if (submitData.screenshotCount < 1) { showToast('请至少添加 1 张截图'); return; }
+  }
+  collectSubmitStep();
+  submitStep++;
+  renderSubmitStep();
+}
+
+function collectSubmitStep() {
+  if (submitStep === 1) {
+    submitData.seedValue = document.getElementById('sub-seedval')?.value || '';
+    submitData.edition = document.getElementById('sub-edition')?.value || 'java';
+    submitData.testedVersion = document.getElementById('sub-version')?.value || '';
+    submitData.worldType = document.getElementById('sub-world')?.value || 'normal';
+    submitData.modEnv = document.getElementById('sub-mod')?.value || 'vanilla';
+    if (submitData.modEnv === 'modpack') {
+      submitData.modpackName = document.getElementById('sub-modpack-name')?.value || '';
+      submitData.modpackVersion = document.getElementById('sub-modpack-ver')?.value || '';
+    }
+  } else if (submitStep === 2) {
+    submitData.spawnX = parseInt(document.getElementById('sub-spawn-x')?.value) || 0;
+    submitData.spawnZ = parseInt(document.getElementById('sub-spawn-z')?.value) || 0;
+    submitData.coords = submitData.coords.map((c, i) => ({
+      label: document.getElementById('sub-coord-label-' + i)?.value || '',
+      x: parseInt(document.getElementById('sub-coord-x-' + i)?.value) || 0,
+      y: document.getElementById('sub-coord-y-' + i)?.value ? parseInt(document.getElementById('sub-coord-y-' + i).value) : null,
+      z: parseInt(document.getElementById('sub-coord-z-' + i)?.value) || 0,
+    }));
+  } else if (submitStep === 3) {
+    submitData.title = document.getElementById('sub-title')?.value || '';
+    submitData.description = document.getElementById('sub-desc')?.value || '';
+  }
+}
+
+function toggleSubmitTag(key) {
+  const idx = submitData.tags.indexOf(key);
+  if (idx >= 0) submitData.tags.splice(idx, 1);
+  else submitData.tags.push(key);
+  renderSubmitStep();
+}
+
+function doSubmit() {
+  collectSubmitStep();
+  if (!currentUser) { showToast('请先登录'); return; }
+  if (submitData.tags.filter(k => TAGS.find(t => t.key === k && t.category === 'gameplay')).length === 0) {
+    showToast('请至少选择一个玩法标签'); return;
+  }
+  if (!submitData.title || !submitData.description) { showToast('请填写标题和描述'); return; }
+  SEEDS.push({
+    id: SEEDS.length + 1,
+    title: submitData.title,
+    seed_value: submitData.seedValue,
+    description: submitData.description,
+    edition: submitData.edition,
+    tested_version: submitData.testedVersion,
+    compatible_range: null,
+    world_type: submitData.worldType,
+    mod_env: submitData.modEnv,
+    modpack_name: submitData.modEnv === 'modpack' ? submitData.modpackName : null,
+    modpack_version: submitData.modEnv === 'modpack' ? submitData.modpackVersion : null,
+    spawn_x: submitData.spawnX, spawn_z: submitData.spawnZ,
+    status: 'pending', like_count: 0, collection_count: 0, view_count: 0,
+    tags: submitData.tags, uploader_id: currentUser.id,
+    key_coords: submitData.coords.filter(c => c.label.trim()),
+    screenshot_count: submitData.screenshotCount,
+  });
+  showToast('投稿已提交，等待审核');
+  submitStep = 1;
+  submitData = { seedValue: '', edition: 'java', testedVersion: '', worldType: 'normal', modEnv: 'vanilla', modpackName: '', modpackVersion: '', spawnX: 0, spawnZ: 0, coords: [], screenshotCount: 0, title: '', description: '', tags: [] };
+  navigate('browse');
+}
+
+// ── AUTH ──
+
+function doDevLogin() {
+  const uid = parseInt(document.getElementById('dev-user-select').value);
+  currentUser = USERS[uid];
+  showToast('已登录: ' + currentUser.display_name);
+  navigate('home');
+}
+
+function doLogout() {
+  currentUser = null;
+  showToast('已退出登录');
+  navigate('home');
+}
+
+// ── COLLECTIONS ──
+
+function renderCollections() {
+  if (!currentUser) {
+    document.getElementById('collections-grid').innerHTML = '<div class="micro" style="padding:40px;text-align:center;color:var(--ink-30);grid-column:1/-1">[ 请先登录 ]</div>';
+    return;
+  }
+  document.getElementById('collections-grid').innerHTML = COLLECTIONS.map(c =>
+    '<div class="card" style="cursor:pointer;position:relative" onclick="viewCollection(' + c.id + ')">' +
+      '<div class="collection-card-cover"><span class="micro" style="color:var(--ink-30)">' + (c.is_public ? '[ PUBLIC ]' : '[ PRIVATE ]') + '</span></div>' +
+      '<div class="card-body">' +
+        '<div class="card-title" style="margin-bottom:2px">' + c.name + '</div>' +
+        (c.description ? '<div class="card-desc">' + c.description + '</div>' : '') +
+        '<div class="micro" style="display:flex;gap:12px;color:var(--ink-60)">' +
+          '<span>' + c.seed_count + ' 个种子</span>' +
+          '<span>' + (c.is_public ? '公开' : '私有') + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<button class="btn btn--sm" style="position:absolute;top:8px;right:8px;font-size:0.6rem;padding:2px 8px" onclick="event.stopPropagation();deleteCollection(' + c.id + ')">[ DEL ]</button>' +
+    '</div>'
+  ).join('');
+}
+
+function viewCollection(id) {
+  const c = COLLECTIONS.find(c => c.id === id);
+  if (!c) return;
+  const seeds = SEEDS.filter(s => c.seed_ids.includes(s.id));
+  document.getElementById('modal-coll-title').textContent = '[ ' + c.name + ' ]';
+  document.getElementById('modal-coll-seeds').innerHTML = seeds.map(renderSeedCard).join('') || '<span class="micro" style="color:var(--ink-30)">收藏夹为空</span>';
+  document.getElementById('modal-collection-detail').classList.remove('hidden');
+}
+
+function toggleCreateCollection() {
+  document.getElementById('modal-collection').classList.remove('hidden');
+}
+
+function doCreateCollection() {
+  const name = document.getElementById('coll-name').value.trim();
+  if (!name) { showToast('请填写收藏夹名称'); return; }
+  const desc = document.getElementById('coll-desc').value.trim();
+  const isPublic = document.getElementById('coll-public').checked;
+  COLLECTIONS.push({
+    id: COLLECTIONS.length + 1,
+    name, description: desc, is_public: isPublic,
+    seed_count: 0, cover_seed_id: null, seed_ids: [],
+  });
+  showToast('收藏夹已创建');
+  closeModal('modal-collection');
+  document.getElementById('coll-name').value = '';
+  document.getElementById('coll-desc').value = '';
+  document.getElementById('coll-public').checked = false;
+  renderCollections();
+}
+
+function deleteCollection(id) {
+  const idx = COLLECTIONS.findIndex(c => c.id === id);
+  if (idx >= 0) COLLECTIONS.splice(idx, 1);
+  showToast('收藏夹已删除');
+  renderCollections();
+}
+
+// ── ADMIN ──
+
+function renderAdmin() {
+  if (!currentUser || currentUser.role !== 'admin') {
+    document.getElementById('admin-content').innerHTML = '<div class="micro" style="padding:40px;text-align:center;color:var(--ink-30)">[ 需要管理员权限 ]</div>';
+    return;
+  }
+  const pending = SEEDS.filter(s => s.status === 'pending');
+  if (pending.length === 0) {
+    document.getElementById('admin-content').innerHTML = '<div class="micro" style="padding:40px;text-align:center;color:var(--ink-30)">[ 没有待审核的种子 ]</div>';
+    return;
+  }
+  document.getElementById('admin-content').innerHTML =
+    '<table class="admin-table"><thead><tr><th>TITLE</th><th>SEED VALUE</th><th>EDITION</th><th>UPLOADER</th><th>DATE</th><th></th></tr></thead><tbody>' +
+    pending.map(s => {
+      const u = USERS[s.uploader_id];
+      return '<tr>' +
+        '<td style="font-weight:500">' + s.title + '</td>' +
+        '<td><code style="font-size:0.7rem">' + s.seed_value + '</code></td>' +
+        '<td>' + s.edition.toUpperCase() + ' ' + s.tested_version + '</td>' +
+        '<td>' + (u ? u.display_name : '?') + '</td>' +
+        '<td>' + '2026-05-28' + '</td>' +
+        '<td style="display:flex;gap:6px">' +
+          '<button class="btn btn--primary btn--sm" onclick="approveSeed(' + s.id + ')">[ APPROVE ]</button>' +
+          '<button class="btn btn--danger btn--sm" onclick="openReject(' + s.id + ')">[ REJECT ]</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('') +
+    '</tbody></table>';
+}
+
+function approveSeed(id) {
+  const seed = SEEDS.find(s => s.id === id);
+  if (seed) seed.status = 'approved';
+  showToast('已通过');
+  renderAdmin();
+}
+
+function openReject(id) {
+  rejectTargetId = id;
+  document.getElementById('reject-reason').value = '';
+  document.getElementById('modal-reject').classList.remove('hidden');
+}
+
+function doReject() {
+  const reason = document.getElementById('reject-reason').value.trim();
+  if (!reason) { showToast('请填写拒绝原因'); return; }
+  const seed = SEEDS.find(s => s.id === rejectTargetId);
+  if (seed) { seed.status = 'rejected'; seed.rejection_reason = reason; }
+  showToast('已拒绝');
+  closeModal('modal-reject');
+  rejectTargetId = null;
+  renderAdmin();
+}
+
+// ── MODAL ──
+
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+}
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.add('hidden');
+  });
+});
+
+// ── FILTER CHIPS INIT ──
+
+(function initFilterTags() {
+  const gp = TAGS.filter(t => t.category === 'gameplay');
+  const ft = TAGS.filter(t => t.category === 'feature');
+
+  function chipHtml(t, active) {
+    return '<button class="chip' + (active ? ' chip--active' : '') + '" onclick="toggleBrowseTag(\'' + t.key + '\')">' + t.icon + ' ' + t.label + '</button>';
+  }
+
+  document.getElementById('filter-gameplay-tags').innerHTML = gp.map(t => chipHtml(t, false)).join('');
+  document.getElementById('filter-feature-tags').innerHTML = ft.map(t => chipHtml(t, false)).join('');
+})();
+
+function toggleBrowseTag(key) {
+  browseFilters.tag = browseFilters.tag === key ? '' : key;
+  browseFilters.page = 1;
+  renderBrowse();
+}
+
+// ── BOOT ──
+
+renderHome();
+updateNavAuth();
+</script>
+</body>
+</html>
