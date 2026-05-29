@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { h, ref, computed, onMounted } from 'vue'
+import { h, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 import {
   NDropdown, NButton, NAvatar, NBadge, NIcon, NPopover,
 } from 'naive-ui'
-import { Diamond, Search, LogIn, LogOut, Add, Heart, Notifications } from '@vicons/ionicons5'
+import { Search, LogIn, LogOut, Add, Heart, Notifications } from '@vicons/ionicons5'
 import type { Component } from 'vue'
 import type { Notification } from '@/types'
 import api from '@/api'
@@ -16,7 +16,6 @@ const router = useRouter()
 const auth = useAuthStore()
 const theme = useThemeStore()
 
-const logoColor = computed(() => theme.isDark ? '#EAEAEA' : '#0A0A0A')
 
 const showSearch = ref(false)
 const searchQuery = ref('')
@@ -84,7 +83,7 @@ function handleUserSelect(key: string) {
     <div class="navbar-inner">
       <div class="nav-left">
         <router-link to="/" class="nav-logo">
-          <n-icon size="22" :component="Diamond" :color="logoColor" />
+          <img class="nav-logo-icon" src="/logo-44.png" srcset="/logo-22.png 1x, /logo-44.png 2x" width="22" height="22" alt="" />
           <span class="logo-text">Seed Vault</span>
         </router-link>
       </div>
@@ -188,6 +187,8 @@ function handleUserSelect(key: string) {
   font-family: var(--font-macro); font-size: 1.1rem; font-weight: 800;
   text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink);
 }
+.nav-logo-icon { display: block; flex-shrink: 0; }
+[data-theme="dark"] .nav-logo-icon { filter: invert(1); }
 .nav-center {
   display: flex; gap: 0;
   border: 1px solid var(--border);

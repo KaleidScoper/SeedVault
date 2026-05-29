@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { darkTheme } from 'naive-ui'
+import type { GlobalThemeOverrides } from 'naive-ui'
 import { useAuthStore } from './stores/auth'
 import { useMetaStore } from './stores/meta'
 import { useThemeStore } from './stores/theme'
@@ -17,32 +18,10 @@ onMounted(async () => {
 })
 
 const naiveTheme = computed(() => (theme.isDark ? darkTheme : null))
-</script>
 
-<template>
-  <n-config-provider :theme="naiveTheme" :theme-overrides="themeOverrides">
-    <n-message-provider>
-      <div class="app-shell">
-        <AppNavbar />
-        <main class="app-main">
-          <router-view />
-        </main>
-        <footer class="app-footer">
-          <span>SEED VAULT &copy; 2026</span>
-          <span class="footer-sep">&#x25AA;</span>
-          <span>灵感来自斯瓦尔巴全球种子库</span>
-          <span class="footer-sep">&#x25AA;</span>
-          <span>REGISTRY ID: SV-NO-0001</span>
-        </footer>
-      </div>
-    </n-message-provider>
-  </n-config-provider>
-</template>
-
-<script lang="ts">
-const themeOverrides = {
+const themeOverrides = computed<GlobalThemeOverrides>(() => ({
   common: {
-    primaryColor: '#0A0A0A',
+    primaryColor: theme.isDark ? '#EAEAEA' : '#0A0A0A',
     primaryColorHover: '#E61919',
     primaryColorPressed: '#B81515',
     borderRadius: '0px',
@@ -74,8 +53,28 @@ const themeOverrides = {
   Message: {
     borderRadius: '0px',
   },
-}
+}))
 </script>
+
+<template>
+  <n-config-provider :theme="naiveTheme" :theme-overrides="themeOverrides">
+    <n-message-provider>
+      <div class="app-shell">
+        <AppNavbar />
+        <main class="app-main">
+          <router-view />
+        </main>
+        <footer class="app-footer">
+          <span>SEED VAULT &copy; 2026</span>
+          <span class="footer-sep">&#x25AA;</span>
+          <span>灵感来自斯瓦尔巴全球种子库</span>
+          <span class="footer-sep">&#x25AA;</span>
+          <span>REGISTRY ID: SV-NO-0001</span>
+        </footer>
+      </div>
+    </n-message-provider>
+  </n-config-provider>
+</template>
 
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }

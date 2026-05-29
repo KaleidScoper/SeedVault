@@ -60,7 +60,8 @@ function formatCount(n: number): string {
           class="cover-img"
         />
         <div v-else class="cover-placeholder">No Image</div>
-        <button class="copy-btn" @click="copySeed" title="复制种子值">
+        <button class="copy-btn" @click="copySeed">
+          <span class="seed-value">{{ seed.seed_value }}</span>
           <n-icon size="16" :component="Copy" />
         </button>
       </div>
@@ -119,6 +120,12 @@ function formatCount(n: number): string {
 .seed-card:hover .card-title { color: var(--paper); }
 .seed-card:hover .card-desc { color: var(--paper); }
 .seed-card:hover .meta-item { color: var(--paper); }
+.seed-card:hover .tag-chip { color: var(--paper); border-color: var(--paper); }
+.seed-card:hover .edition-badge {
+  color: var(--paper) !important;
+  background: transparent !important;
+  border-color: var(--paper) !important;
+}
 
 .card-link { text-decoration: none; color: inherit; display: block; }
 
@@ -143,7 +150,20 @@ function formatCount(n: number): string {
   display: flex; align-items: center; gap: 4px;
   font-family: var(--font-micro); font-size: 0.6rem;
   text-transform: uppercase;
+  white-space: nowrap; overflow: hidden;
+  max-width: 160px;
+  transition: max-width 200ms;
 }
+.copy-btn .seed-value {
+  max-width: 0; opacity: 0;
+  overflow: hidden; white-space: nowrap;
+  transition: max-width 200ms, opacity 150ms;
+}
+.copy-btn:hover .seed-value {
+  max-width: 120px; opacity: 1;
+}
+.copy-btn:hover { max-width: 200px; }
+.copy-btn > i { flex-shrink: 0; }
 .seed-card:not(:hover) .copy-btn { display: none; }
 
 .card-body { padding: 12px 16px 16px; }
