@@ -133,4 +133,4 @@ python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 ## 许可
 
-MIT License
+GNU Affero General Public License Version 3
