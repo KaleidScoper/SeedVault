@@ -15,6 +15,8 @@ const message = useMessage()
 const auth = useAuthStore()
 const seed = ref<SeedDetail | null>(null)
 const loading = ref(true)
+const errorDetail = ref<string>('')
+const errorRaw = ref<any>(null)
 const showLightbox = ref(false)
 const lightboxIndex = ref(0)
 
@@ -27,6 +29,26 @@ onMounted(async () => {
   try {
     const { data } = await api.get(`/seeds/${route.params.id}`)
     seed.value = data.data
+  } catch (e: any) {
+    const r = e?.response
+    const parts: string[] = []
+    if (r) {
+      parts.push(`HTTP ${r.status} ${r.statusText}`)
+      const detail = r.data?.detail
+      if (typeof detail === 'string') {
+        parts.push(detail)
+      } else if (detail) {
+        parts.push(`code=${detail.code} message=${detail.message}`)
+      }
+      parts.push(`URL: GET /seeds/${route.params.id}`)
+    } else if (e?.request) {
+      parts.push(`NETWORK ERROR — 请求已发出但未收到响应`)
+      parts.push(`URL: GET /seeds/${route.params.id}`)
+    } else {
+      parts.push(`REQUEST SETUP ERROR: ${e?.message || e}`)
+    }
+    errorDetail.value = parts.join('\n')
+    errorRaw.value = e
   } finally {
     loading.value = false
   }
@@ -100,7 +122,17 @@ async function toggleLike() {
 
 <template>
   <div v-if="loading" class="loading">加载中...</div>
-  <div v-else-if="!seed" class="error">种子不存在或已被删除</div>
+  <div v-else-if="!seed" class="error">
+    <pre v-if="errorDetail" class="error-detail">{{ errorDetail }}</pre>
+    <pre v-if="errorRaw" class="error-raw">{{ JSON.stringify({
+      message: errorRaw.message,
+      code: errorRaw.code,
+      name: errorRaw.name,
+      status: errorRaw.response?.status,
+      statusText: errorRaw.response?.statusText,
+      data: errorRaw.response?.data,
+    }, null, 2) }}</pre>
+  </div>
   <div v-else class="detail">
     <div class="detail-main">
       <div class="screenshot-area">
@@ -466,5 +498,21 @@ async function toggleLike() {
 .comment-empty {
   font-family: var(--font-micro); font-size: 0.7rem; color: var(--ink-dim);
   text-align: center; padding: 20px 0;
+}
+
+.error-detail {
+  font-family: var(--font-micro); font-size: 0.75rem; color: var(--red);
+  white-space: pre-wrap; word-break: break-all;
+  margin-bottom: 12px; padding: 12px;
+  border: 1px solid var(--red); background: var(--paper);
+  max-width: 600px; margin-left: auto; margin-right: auto; text-align: left;
+}
+.error-raw {
+  font-family: var(--font-micro); font-size: 0.65rem; color: var(--ink-dim);
+  white-space: pre-wrap; word-break: break-all;
+  padding: 12px; border: 1px solid var(--border);
+  background: var(--paper); max-width: 600px;
+  margin-left: auto; margin-right: auto; text-align: left;
+  max-height: 320px; overflow-y: auto;
 }
 </style>

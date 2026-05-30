@@ -163,9 +163,10 @@ const quickTags = [
 .seed-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(272px, 1fr));
-  gap: 1px;
-  background: var(--border);
+  gap: 0;
+  background: var(--paper);
   border: 1px solid var(--border);
+  overflow: hidden;
 }
 
 @media (max-width: 640px) {

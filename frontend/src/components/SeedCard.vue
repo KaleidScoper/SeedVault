@@ -113,7 +113,7 @@ function formatCount(n: number): string {
 <style scoped>
 .seed-card {
   background: var(--paper);
-  border: 1px solid var(--border);
+  box-shadow: 0 0 0 1px var(--border);
   overflow: hidden;
 }
 .seed-card:hover { background: var(--ink); }
@@ -146,6 +146,7 @@ function formatCount(n: number): string {
 .copy-btn {
   position: absolute; top: 8px; right: 8px;
   background: var(--paper); border: 1px solid var(--border);
+  color: var(--ink);
   padding: 3px 8px; cursor: pointer;
   display: flex; align-items: center; gap: 4px;
   font-family: var(--font-micro); font-size: 0.6rem;

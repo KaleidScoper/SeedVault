@@ -122,11 +122,13 @@ async function viewCollection(c: CollectionItem) {
 }
 .collection-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 1px; background: var(--border);
+  gap: 0; background: var(--paper);
   border: 1px solid var(--border);
+  overflow: hidden;
 }
 .collection-card {
   background: var(--paper); cursor: pointer; position: relative; padding: 16px;
+  box-shadow: 0 0 0 1px var(--border);
 }
 .collection-card:hover { background: var(--ink); }
 .collection-card:hover h3 { color: var(--paper); }

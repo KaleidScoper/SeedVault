@@ -188,11 +188,11 @@ function onSeedUpdated() {
 .seed-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1px;
-  background: var(--border);
+  gap: 0;
+  background: var(--paper);
   border: 1px solid var(--border);
+  overflow: hidden;
 }
-.seed-grid > * { background: var(--paper); }
 
 @media (max-width: 768px) {
   .profile-header { flex-direction: column; text-align: center; }

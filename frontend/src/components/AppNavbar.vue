@@ -200,6 +200,8 @@ function handleUserSelect(key: string) {
   border-right: 1px solid var(--border);
   transition: background 80ms, color 80ms;
 }
+.nav-link::before { content: '[ '; }
+.nav-link::after  { content: ' ]'; }
 .nav-link:last-child { border-right: none; }
 .nav-link:hover, .nav-link.router-link-active { background: var(--ink); color: var(--paper); }
 .nav-right { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }

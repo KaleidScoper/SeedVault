@@ -238,9 +238,10 @@ function randomSeed() {
 .seed-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(256px, 1fr));
-  gap: 1px;
-  background: var(--border);
+  gap: 0;
+  background: var(--paper);
   border: 1px solid var(--border);
+  overflow: hidden;
 }
 .pagination { display: flex; justify-content: center; margin-top: 40px; }
 @media (max-width: 768px) {

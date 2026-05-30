@@ -1,5 +1,5 @@
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 from sqlalchemy import select, func, and_, or_, text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -184,21 +184,28 @@ async def get_seed_detail(
     if not seed:
         return None
 
-    # View counting (30 min dedup)
+    # View counting (30 min dedup) — non-fatal
     if session_key:
-        thirty_min_ago = datetime.utcnow().timestamp() - 1800
-        existing = await db.execute(
-            select(SeedView).where(
-                SeedView.seed_id == seed_id,
-                SeedView.session_key == session_key,
-                SeedView.viewed_at >= datetime.utcfromtimestamp(thirty_min_ago),
+        try:
+            thirty_min_ago = datetime.utcnow() - timedelta(minutes=30)
+            existing = await db.execute(
+                select(SeedView).where(
+                    SeedView.seed_id == seed_id,
+                    SeedView.session_key == session_key,
+                )
             )
-        )
-        if not existing.scalar_one_or_none():
-            db.add(SeedView(seed_id=seed_id, session_key=session_key))
-            seed.view_count += 1
-            await db.commit()
-            await db.refresh(seed)
+            old = existing.scalar_one_or_none()
+            if old and old.viewed_at >= thirty_min_ago:
+                pass  # already counted within window
+            else:
+                if old:
+                    await db.delete(old)
+                db.add(SeedView(seed_id=seed_id, session_key=session_key))
+                seed.view_count += 1
+                await db.commit()
+                await db.refresh(seed)
+        except Exception:
+            pass
 
     screenshots = sorted(seed.screenshots, key=lambda s: s.sort_order)
     tag_list = [
